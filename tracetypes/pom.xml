@@ -58,6 +58,10 @@
     <module>org.eclipse.tracecompass.incubator.ros.core</module>
     <module>org.eclipse.tracecompass.incubator.ros.core.tests</module>
     <module>org.eclipse.tracecompass.incubator.ros.ui</module>
+    <module>org.eclipse.tracecompass.incubator.jpftrace</module>
+    <module>org.eclipse.tracecompass.incubator.jpftrace.core</module>
+    <!-- <module>org.eclipse.tracecompass.incubator.jpftrace.core.tests</module>
+    <module>org.eclipse.tracecompass.incubator.jpftrace.ui</module> -->
     <!-- insert modules here -->
   </modules>
 

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.tracetype">
+      <category
+            id="org.eclipse.tracecompass.incubator.jpftrace.core"
+            name="Java Path Finder Trace Format">
+      </category>
+      <type
+            category="org.eclipse.tracecompass.incubator.jpftrace.core"
+            event_type="org.eclipse.tracecompass.tmf.core.event.TmfEvent"
+            id="org.eclipse.tracecompass.incubator.jpftrace.core"
+            isDirectory="false"
+            name="Java Path Finder Trace"
+            trace_type="org.eclipse.tracecompass.incubator.internal.jpftrace.core.trace.JpfTrace">
+      </type>
+      <experiment
+            category="org.eclipse.tracecompass.incubator.jpftrace.core"
+            experiment_type="org.eclipse.tracecompass.incubator.internal.jpftrace.core.trace.JpfTraceExperiment"
+            id="org.eclipse.tracecompass.incubator.jpftrace.core.experiment"
+            name="%jpftrace.experiment.name">
+      </experiment>
+   </extension>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.spanlife.SpanLifeAnalysis"
+            automatic="true"
+            icon="icons/spanslife.png"
+            id="org.eclipse.tracecompass.incubator.jpftrace.analysis.spanlife"
+            name="Spans Life">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.jpftrace.core.trace.JpfTrace">
+         </tracetype>
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.incubator.internal.jpftrace.core.trace.JpfTraceExperiment">
+         </tracetype>
+      </module>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.spanlife.SpanLifeDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.jpftrace.analysis.spanlife.dataprovider">
+      </dataProviderFactory>
+   </extension>
+</plugin>

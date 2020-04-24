@@ -1,0 +1,127 @@
+[INFO] Scanning for projects...
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.xaf.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.xaf.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.lttng2.ust.extras/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.lttng2.ust.extras.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.lttng2.ust.extras.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.kernel/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.kernel.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.kernel.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.kernel.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.eventfieldcount/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.eventfieldcount.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.eventfieldcount.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.filters/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.filters.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.filters.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.filters.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.tmf.ui.multiview/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/analyses/org.eclipse.tracecompass.incubator.tmf.ui.multiview.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/callstack/org.eclipse.tracecompass.incubator.analysis.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/callstack/org.eclipse.tracecompass.incubator.analysis.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/callstack/org.eclipse.tracecompass.incubator.callstack/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/callstack/org.eclipse.tracecompass.incubator.callstack.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/callstack/org.eclipse.tracecompass.incubator.callstack.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/callstack/org.eclipse.tracecompass.incubator.callstack.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/callstack/org.eclipse.tracecompass.incubator.callstack.ui.swtbot.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/vm/org.eclipse.tracecompass.incubator.virtual.machine.analysis/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/vm/org.eclipse.tracecompass.incubator.virtual.machine.analysis.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/vm/org.eclipse.tracecompass.incubator.virtual.machine.analysis.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/vm/org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/vm/org.eclipse.tracecompass.incubator.virtual.machine.analysis.ui.swtbot.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.traceevent/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.traceevent.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.traceevent.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.traceevent.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.hudson.maven/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.hudson.maven.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.hudson.maven.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.hudson.maven.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.opentracing/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.opentracing.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.opentracing.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.opentracing.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.perf.profiling/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.perf.profiling.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.perf.profiling.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.uftrace/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.uftrace.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.uftrace.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.tracecompass/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.tracecompass.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.tracecompass.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.ftrace/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.ftrace.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.ftrace.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.atrace/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.atrace.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.atrace.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.ros/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.ros.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.ros.core.tests/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.ros.ui/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.jpftrace/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/tracetypes/org.eclipse.tracecompass.incubator.jpftrace.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core/.polyglot.build.properties
+/home/zy/d/projects/org.eclipse.tracecompass.incubator/trace-server/org.eclipse.tracecompass.incubator.trace.server.jersey.rest.core.tests/.polyglot.build.properties
+[INFO] Computing target platform for MavenProject: org.eclipse.tracecompass.incubator:org.eclipse.tracecompass.incubator.releng-site:0.0.1-SNAPSHOT @ /home/zy/d/projects/org.eclipse.tracecompass.incubator/common/org.eclipse.tracecompass.incubator.releng-site/pom.xml
+[INFO] Fetching p2.index from https://download.eclipse.org/tools/cdt/releases/9.11/cdt-9.11.0/
+[INFO] Fetching p2.index from https://download.eclipse.org/tools/cdt/releases/9.11/cdt-9.11.0/
+[INFO] Adding repository https://download.eclipse.org/tools/cdt/releases/9.11/cdt-9.11.0
+[INFO] Fetching p2.index from https://download.eclipse.org/linuxtools/update-7.6.0/
+[INFO] Fetching p2.index from https://download.eclipse.org/linuxtools/update-7.6.0/
+[INFO] Adding repository https://download.eclipse.org/linuxtools/update-7.6.0
+[INFO] Fetching p2.index from https://download.eclipse.org/technology/swtbot/snapshots/
+[INFO] Adding repository https://download.eclipse.org/technology/swtbot/snapshots
+[INFO] Fetching p2.index from https://download.eclipse.org/releases/2020-03/
+[INFO] Adding repository https://download.eclipse.org/releases/2020-03
+[INFO] Fetching p2.index from https://download.eclipse.org/technology/epp/packages/2020-03/
+[INFO] Fetching p2.index from https://download.eclipse.org/technology/epp/packages/2020-03/
+[INFO] Fetching p2.index from https://download.eclipse.org/releases/2020-03/202003181000/
+[INFO] Fetching p2.index from https://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/repository/
+[INFO] Adding repository https://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/repository
+[INFO] Fetching p2.index from https://download.eclipse.org/tools/orbit/downloads/drops2/R20200224183213/repository/
+[INFO] Fetching p2.index from https://download.eclipse.org/tools/orbit/downloads/drops2/R20200224183213/repository/
+[INFO] Fetching p2.index from https://download.eclipse.org/cbi/updates/license/
+[INFO] Fetching p2.index from https://download.eclipse.org/cbi/updates/license/
+[INFO] Adding repository https://download.eclipse.org/cbi/updates/license
+[INFO] Fetching p2.index from https://download.eclipse.org/cbi/updates/license/2.0.2.v20181016-2210/
+[INFO] Fetching p2.index from https://download.eclipse.org/cbi/updates/license/2.0.2.v20181016-2210/
+[INFO] Fetching p2.index from https://download.eclipse.org/eclipse/updates/4.15/R-4.15-202003050155/
+[INFO] Fetching p2.index from https://download.eclipse.org/eclipse/updates/4.15/R-4.15-202003050155/
+[INFO] Adding repository https://download.eclipse.org/eclipse/updates/4.15/R-4.15-202003050155
+[INFO] Adding repository https://archive.eclipse.org/tracecompass/tracecompass-test-traces/repository/1.7.2
+[INFO] Fetching p2.index from https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repository/
+[INFO] Fetching p2.index from https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repository/
+[INFO] Adding repository https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repository
+[INFO] Fetching p2.index from https://download.eclipse.org/modeling/emf/emf/builds/release/2.21/
+[INFO] Fetching p2.index from https://download.eclipse.org/modeling/emf/emf/builds/release/2.21/
+[INFO] Adding repository https://download.eclipse.org/modeling/emf/emf/builds/release/2.21
+[INFO] Fetching p2.index from https://download.eclipse.org/swtchart/releases/0.12.0/repository/
+[INFO] Fetching p2.index from https://download.eclipse.org/swtchart/releases/0.12.0/repository/
+[INFO] Adding repository https://download.eclipse.org/swtchart/releases/0.12.0/repository
+[INFO] Fetching p2.index from http://download.eclipse.org/tracecompass/master/repository/
+[INFO] Adding repository http://download.eclipse.org/tracecompass/master/repository
+[INFO] Fetching content.xml.xz from http://download.eclipse.org/tracecompass/master/repository/
+[INFO] Fetching content.xml.xz from http://download.eclipse.org/tracecompass/master/repository/
+[INFO] Fetching p2.index from https://download.eclipse.org/tracecompass/master/rcp-repository/
+[INFO] Fetching p2.index from https://download.eclipse.org/tracecompass/master/rcp-repository/
+[INFO] Adding repository https://download.eclipse.org/tracecompass/master/rcp-repository
+[INFO] Fetching content.xml.xz from https://download.eclipse.org/tracecompass/master/rcp-repository/
+[INFO] Fetching content.xml.xz from https://download.eclipse.org/tracecompass/master/rcp-repository/
+[INFO] Fetching p2.index from http://download.eclipse.org/nebula/releases/latest/
+[INFO] Fetching p2.index from http://download.eclipse.org/nebula/releases/latest/
+[INFO] Adding repository http://download.eclipse.org/nebula/releases/latest
+[INFO] Fetching p2.index from http://download.eclipse.org/releases/2019-09/
+[INFO] Fetching p2.index from http://download.eclipse.org/releases/2019-09/
+[INFO] Adding repository http://download.eclipse.org/releases/2019-09
+[INFO] Fetching p2.index from http://download.eclipse.org/technology/epp/packages/2019-09/
+[INFO] Fetching p2.index from http://download.eclipse.org/technology/epp/packages/2019-09/
+[INFO] Fetching p2.index from http://download.eclipse.org/releases/2019-09/201909181001/
+[INFO] Fetching p2.index from http://download.eclipse.org/releases/2019-09/201909181001/
+[INFO] Adding repository https://download.eclipse.org/ease/integration/nightly
+[INFO] Fetching content.jar from https://download.eclipse.org/ease/integration/nightly/ (39.89kB)
+[INFO] Fetching content.jar from https://download.eclipse.org/ease/integration/nightly/ (39.89kB)
+[INFO] Adding repository https://bintray.com/artifact/download/pontesegger/ease-engines
+[INFO] Adding repository https://dl.bintray.com/py4j/py4j-eclipse/0.10.8.1

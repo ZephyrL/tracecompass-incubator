@@ -140,7 +140,7 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
       <feature id="org.eclipse.ecf.core.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.feature"/>
-      <feature id="org.eclipse.tracecompass.incubator.virtual.machine.analysis"/>
+      <!-- <feature id="org.eclipse.tracecompass.incubator.virtual.machine.analysis"/> -->
       <feature id="org.eclipse.tracecompass.incubator.rcp.branding.feature"/>
       <feature id="org.eclipse.tracecompass.incubator.atrace"/>
       <feature id="org.eclipse.tracecompass.incubator.callstack"/>
@@ -162,9 +162,10 @@ Java and all Java-based trademarks are trademarks of Oracle Corporation in the U
       <feature id="org.eclipse.tracecompass.incubator.rcp" installMode="root"/>
       <feature id="org.eclipse.tracecompass.tmf.cli" installMode="root"/>
       <feature id="org.eclipse.tracecompass.incubator.filters" installMode="root"/>
-      <feature id="org.eclipse.tracecompass.incubator.scripting" installMode="root"/>
-      <feature id="org.eclipse.tracecompass.incubator.scripting.javascript" installMode="root"/>
-      <feature id="org.eclipse.tracecompass.incubator.scripting.python" installMode="root"/>
+      <!-- <feature id="org.eclipse.tracecompass.incubator.scripting" installMode="root"/> -->
+      <!-- <feature id="org.eclipse.tracecompass.incubator.scripting.javascript" installMode="root"/> -->
+      <!-- <feature id="org.eclipse.tracecompass.incubator.scripting.python" installMode="root"/> -->
+      <feature id="org.eclipse.tracecompass.incubator.jpftrace"/>
    </features>
 
    <configurations>

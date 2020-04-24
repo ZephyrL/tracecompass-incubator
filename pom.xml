@@ -313,11 +313,11 @@
     <module>common</module>
     <module>analyses</module>
     <module>callstack</module>
-    <module>vm</module>
-    <module>scripting</module>
+    <!-- <module>vm</module> -->
+    <!-- <module>scripting</module> -->
     <module>tracetypes</module>
-    <module>trace-server</module>
-    <module>doc</module>
+    <!-- <module>trace-server</module> -->
+    <!-- <module>doc</module> -->
     <module>rcp</module>
   </modules>
 
