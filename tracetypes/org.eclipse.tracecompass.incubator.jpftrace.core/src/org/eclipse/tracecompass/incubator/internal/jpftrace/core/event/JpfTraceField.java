@@ -75,6 +75,8 @@ public class JpfTraceField {
      * @return an event field
      */
     public static @Nullable JpfTraceField parseJson(String fieldsString, @Nullable String processField) {
+        Log("JpfTraceField::parseJson");
+
         @Nullable
         JsonObject root = G_SON.fromJson(fieldsString, JsonObject.class);
 
