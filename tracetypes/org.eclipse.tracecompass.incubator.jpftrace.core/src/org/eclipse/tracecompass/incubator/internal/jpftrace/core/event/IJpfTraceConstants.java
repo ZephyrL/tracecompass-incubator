@@ -2,7 +2,7 @@ package org.eclipse.tracecompass.incubator.internal.jpftrace.core.event;
 
 public interface IJpfTraceConstants {
 
-    String TRACE_ID = "traceID"; 
+    String TRANSITION_ID = "transitionId"; 
 
     String BASE_TIME = "time";
 
@@ -29,73 +29,48 @@ public interface IJpfTraceConstants {
     String SOURCES = "sources";
 
     String INSTRUCTIONS = "instructions";
-    /**
-     * spanID field name
-     */
-    String SPAN_ID = "spanID"; 
-    /**
-     * flags field name (specific to jaeger tracer)
-     */
-    String FLAGS = "flags"; 
-    /**
-     * operationName field name
-     */
-    String OPERATION_NAME = "operationName"; 
-    /**
-     * references field name
-     */
-    String REFERENCES = "references"; 
-    /**
-     * reference type field name
-     */
-    String REFERENCE_TYPE = "refType"; 
-    /**
-     * startTime field name
-     */
-    String START_TIME = "startTime"; 
-    /**
-     * duration field name
-     */
-    String DURATION = "duration"; 
-    /**
-     * tags field name
-     */
-    String TAGS = "tags"; 
-    /**
-     * logs field name
-     */
-    String LOGS = "logs"; 
-    /**
-     * processID field name
-     */
-    String PROCESS_ID = "processID"; 
-    /**
-     * processID field name
-     */
-    String PROCESS_NAME = "processName"; 
-    /**
-     * service field name
-     */
-    String SERVICE_NAME = "serviceName"; 
-    /**
-     * process tags field name
-     */
-    String PROCESS_TAGS = "processTags"; 
-    /**
-     * key field name
-     */
-    String KEY = "key"; 
-    /**
-     * value field name
-     */
-    String VALUE = "value"; 
-    /**
-     * timestamp field name
-     */
-    String TIMESTAMP = "timestamp"; 
-    /**
-     * fields field name
-     */
-    String FIELDS = "fields"; 
 
+    String STEP_LOCATION = "stepLocation";
+
+    String FILE_LOCATION = "fileLocation";
+
+    String IS_VIRTUAL_INV = "isVirtualInv";
+
+    String IS_FIELD_INST = "isFieldInst";
+
+    String IS_LOCK_INST = "isLockInst";
+
+    String LOCK_FIELD_NAME = "lockFieldName";
+
+    String IS_JVM_INVOK = "isJVMInvok";
+
+    String IS_JVM_RETURN = "isJVMReturn";
+
+    String TYPE = "type";
+
+    String PREV_PID = "prev_pid";
+
+    String PREV_COMM = "prev_comm";
+
+    String PREV_PRIO = "prev_prio";
+
+    String PREV_STATE = "prev_state";
+
+    String NEXT_PID = "next_pid";
+
+    String NEXT_COMM = "next_comm";
+
+    String NEXT_PRIO = "next_prio";
+
+    String COMM = "comm";
+
+    String PID = "pid";
+
+    String PRIO = "prio";
+
+    String SUCCESS = "success";
+
+    String TARGET_CPU = "target_cpu";
+
+    String DURATION = "duration";
 }

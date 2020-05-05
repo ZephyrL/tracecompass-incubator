@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -16,11 +14,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
+import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.Activator;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.IJpfTraceConstants;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceAspects;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceEvent;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceField;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
 import org.eclipse.tracecompass.internal.provisional.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfLostEvent;
@@ -42,27 +43,30 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 
-public class JpfTrace extends JsonTrace {
+public class JpfTrace extends JsonTrace implements IKernelTrace {
 
     private final @NonNull Iterable<@NonNull ITmfEventAspect<?>> fEventAspects;
-    private final Map<String, String> fProcesses;
 
     /**
      * Constructor
      */
     public JpfTrace() {
         fEventAspects = Lists.newArrayList(JpfTraceAspects.getAspects());
-        fProcesses = new HashMap<>();
+    }
+
+    private static final void Log(String s){
+        System.out.println(s);
     }
 
     @Override
     public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
         super.initTrace(resource, path, type);
 
-        fProperties.put("Type", "Jpf-Trace");
+        fProperties.put("Type", "JpfTrace");
 
         String dir = TmfTraceManager.getSupplementaryFileDir(this);
         
+        Log("JpfTrace::initTrace: opening " +  dir + " " + path);
         fFile = new File(dir + new File(path).getName());
         if (!fFile.exists()) {
             Job sortJob = new JpfTraceSortingJob(this, path);
@@ -78,52 +82,43 @@ public class JpfTrace extends JsonTrace {
             IStatus result = sortJob.getResult();
             if (!result.isOK()) {
                 throw new TmfTraceException("Job failed " + result.getMessage()); 
-            }
+            } 
+            Log("JpfTrace::initTrace: Sorting Job Complete");
         }
+        Log("JpfTrace::initTrace: try getting timestamp");
         try {
             fFileInput = new BufferedRandomAccessFile(fFile, "r"); 
+
+            registerBaseTimestamp(path);
+            Log("JpfTrace::initTrace: baseTimestamp:" + String.valueOf(JpfTraceField.getPseudoTime()));
+
             goToCorrectStart(fFileInput);
-            registerProcesses(path);
+            Log("JpfTrace::initTrace complete");
         } catch (IOException e) {
             throw new TmfTraceException(e.getMessage(), e);
         }
     }
 
-    /**
-     * Save the processes list
-     *
-     * @param path
-     *            trace file path
-     */
-    public void registerProcesses(String path) {
+    private static void registerBaseTimestamp(String path) {
         try (FileReader fileReader = new FileReader(path)) {
             try (JsonReader reader = new JsonReader(fileReader);) {
                 Gson gson = new Gson();
-                JsonObject object = gson.fromJson(reader, JsonObject.class);
-                JsonElement trace = object.get("data").getAsJsonArray().get(0); 
-                JsonObject processes = trace.getAsJsonObject().get("processes").getAsJsonObject(); 
-                for (int i = 1; i <= processes.size(); i++) {
-                    String processName = "p" + i; 
-                    fProcesses.put(processName, gson.toJson(processes.get(processName)));
-                }
 
-                JsonObject transitions = trace.getAsJsonObject().get("transitions").getAsJsonObject();
-                for (int i = 1; i <= transitions.size(); i++) {
-                    String transitionName = "t" + i;
-                    fProcesses.put(transitionName, gson.toJson(transitions.get(transitionName)));
-                }
-
-                System.out.println("JPF::registerProcesses::number of transitions: " + String.valueOf(transitions.size()));
-
+                JsonObject root = gson.fromJson(reader, JsonObject.class);
+                JsonElement jsonElement = root.get("time");
+                long baseTime = (jsonElement != null) ? jsonElement.getAsLong() : 0L;
+                JpfTraceField.setPseudoTime(baseTime);
             }
+
         } catch (IOException e) {
-            // Nothing
+            Log("JpfTrace::getBaseTimestamp: IOException");
         }
+
     }
 
     @Override
     public IStatus validate(IProject project, String path) {
-        System.out.println("JPF::validate");
+        Log("JPF::validate");
 
         File file = new File(path);
         if (!file.exists()) {
@@ -147,10 +142,10 @@ public class JpfTrace extends JsonTrace {
             int lineCount = 0;
             int matches = 0;
             String line = readNextEventString(() -> rafile.read());
-            // System.out.println("JPF::validate: " + line);
+            // Log("JPF::validate: " + line);
             while ((line != null) && (lineCount++ < MAX_LINES)) {
                 try {
-                    JpfTraceField field = JpfTraceField.parseJson(line, null);
+                    JpfTraceField field = JpfTraceField.parseJson(line);
                     if (field!= null) {
                         matches++;
                     }
@@ -172,6 +167,8 @@ public class JpfTrace extends JsonTrace {
     }
 
     private static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
+        // skip start if it's {"traceEvents":
+        String startKey = "\"transitions\""; //$NON-NLS-1$
 
         StringBuilder sb = new StringBuilder();
         int val = rafile.read();
@@ -186,36 +183,22 @@ public class JpfTrace extends JsonTrace {
         skipList.add((int) '\b');
         skipList.add((int) '\f');
 
-        // feed file input to \"data\"
-        while (val != -1 
-                && sb.length() < 200 
-                && !sb.toString().endsWith("\"data\"")
-            ) {
+        // feed file input to \"transitions\"
+        while (val != -1 && val != ':' && sb.length() < 30) {
             if (!skipList.contains(val)) {
                 sb.append((char) val);
             }
             val = rafile.read();
         }
 
-        // feed next colon
-        while (val != -1 && val != ':'){
-            val = rafile.read();
+
+        if (!(sb.toString().startsWith('{' + startKey) && rafile.length() > 30)) {
+            rafile.seek(0);
         }
 
-        System.out.println("JPF::goToCorrectStart: " + sb.toString());
-        System.out.println("JPF::goToCorrectStart: " + String.valueOf(rafile.getFilePointer()));
+        Log("JPF::goToCorrectStart: " + sb.toString());
+        Log("JPF::goToCorrectStart: " + String.valueOf(rafile.getFilePointer()));
 
-        // if (sb.toString().startsWith("{\"data\"")) { 
-        //     int data = 0;
-        //     for (int nbBracket = 0; nbBracket < 2 && data != -1; nbBracket++) {
-        //         data = rafile.read();
-        //         while (data != '[' && data != -1) {
-        //             data = rafile.read();
-        //         }
-        //     }
-        // } else {
-        //     rafile.seek(0);
-        // }
     }
 
     @Override
@@ -225,6 +208,7 @@ public class JpfTrace extends JsonTrace {
 
     @Override
     public ITmfEvent parseEvent(ITmfContext context) {
+        Log("JpfTrace::parseEvent: called");
         @Nullable
         ITmfLocation location = context.getLocation();
         if (location instanceof TmfLongLocation) {
@@ -239,8 +223,8 @@ public class JpfTrace extends JsonTrace {
                 }
                 String nextJson = readNextEventString(() -> fFileInput.read());
                 if (nextJson != null) {
-                    String process = fProcesses.get(JpfTraceField.getProcess(nextJson));
-                    JpfTraceField field = JpfTraceField.parseJson(nextJson, process);
+                    // String process = fProcesses.get(JpfTraceField.getProcess(nextJson));
+                    JpfTraceField field = JpfTraceField.parseJson(nextJson);
                     if (field == null) {
                         return null;
                     }
@@ -276,5 +260,10 @@ public class JpfTrace extends JsonTrace {
                 getIndexer().updateIndex(context, timestamp);
             }
         }
+    }
+
+    @Override
+    public IKernelAnalysisEventLayout getKernelEventLayout() {
+        return JpfTraceEventLayout.getInstance();
     }
 }

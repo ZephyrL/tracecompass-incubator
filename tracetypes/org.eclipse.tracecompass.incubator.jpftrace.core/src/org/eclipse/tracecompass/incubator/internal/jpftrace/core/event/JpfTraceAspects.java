@@ -1,14 +1,15 @@
 package org.eclipse.tracecompass.incubator.internal.jpftrace.core.event;
 
-import java.text.Format;
-import java.util.Collections;
-import java.util.Map;
+// import java.text.Format;
+// import java.util.Collections;
+// import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.common.core.format.SubSecondTimeWithUnitFormat;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 
 import com.google.common.collect.ImmutableList;
 
@@ -35,11 +36,13 @@ public class JpfTraceAspects {
             aspectSet = ImmutableList.of(
                     new JpfTraceLabelAspect(),
                     TmfBaseAspects.getTimestampAspect(),
-                    new JpfTraceDurationAspect(),
-                    new JpfTraceSpanIdAspect(),
-                    new JpfTraceProcessAspect(),
-                    new JpfTraceProcessTagsAspect(),
-                    new JpfTraceTagsAspect());
+                    TmfBaseAspects.getEventTypeAspect(),
+                    TmfBaseAspects.getContentsAspect(),
+                    new JpfTraceCpuAspect(),
+                    new JpfTraceThreadStateAspect(),
+                    new JpfTraceThreadNameAspect(),
+                    new JpfTraceChoiceAspect()
+                    );
             aspects = aspectSet;
         }
         return aspectSet;
@@ -63,97 +66,67 @@ public class JpfTraceAspects {
         }
     }
 
-    private static class JpfTraceProcessAspect implements IJpfTraceAspect<String> {
-
+    private static class JpfTraceThreadStateAspect implements IJpfTraceAspect<String> {
+        
         @Override
         public @NonNull String getName() {
-            return String.valueOf(Messages.JpfTraceAspects_Process);
+            return String.valueOf(Messages.JpfTraceAspects_ThreadState);
         }
 
         @Override
         public @NonNull String getHelpText() {
-            return String.valueOf(Messages.JpfTraceAspects_ProcessD);
+            return String.valueOf(Messages.JpfTraceAspects_ThreadStateD);
+        }
+
+        @Override 
+        public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
+            return event.getThreadState();
+        }
+    }
+
+    private static class JpfTraceThreadNameAspect implements IJpfTraceAspect<String> {
+
+        @Override
+        public @NonNull String getName() {
+            return String.valueOf(Messages.JpfTraceAspects_ThreadName);
+        }
+
+        @Override
+        public @NonNull String getHelpText() {
+            return String.valueOf(Messages.JpfTraceAspects_ThreadNameD);
         }
 
         @Override
         public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            Object field = event.getField().getProcessName();
-            return String.valueOf(field);
+            return event.getThreadName();
         }
     }
-
-    private static class JpfTraceDurationAspect implements IJpfTraceAspect<@Nullable String> {
-        private static final Format FORMATTER = SubSecondTimeWithUnitFormat.getInstance();
+    
+    private static class JpfTraceChoiceAspect implements IJpfTraceAspect<String> {
 
         @Override
         public @NonNull String getName() {
-            return String.valueOf(Messages.JpfTraceAspects_Duration);
+            return String.valueOf(Messages.JpfTraceAspects_Choice);
         }
 
         @Override
         public @NonNull String getHelpText() {
-            return String.valueOf(Messages.JpfTraceAspects_DurationD);
-        }
-
-        @Override
-        public @Nullable String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            return FORMATTER.format(event.getField().getDuration());
-        }
-    }
-
-    private static class JpfTraceSpanIdAspect implements IJpfTraceAspect<String> {
-
-        @Override
-        public @NonNull String getName() {
-            return String.valueOf(Messages.JpfTraceAspects_SpanId);
-        }
-
-        @Override
-        public @NonNull String getHelpText() {
-            return String.valueOf(Messages.JpfTraceAspects_SpanIdD);
+            return String.valueOf(Messages.JpfTraceAspects_ChoiceD);
         }
 
         @Override
         public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            return event.getField().getSpanId();
+            return event.getField().getChoiceId();
         }
     }
 
-    private static class JpfTraceProcessTagsAspect implements IJpfTraceAspect<Map<String, Object>> {
-
+    private static class JpfTraceCpuAspect extends TmfCpuAspect {
         @Override
-        public String getName() {
-            return String.valueOf(Messages.JpfTraceAspects_ProcessTags);
-        }
-
-        @Override
-        public String getHelpText() {
-            return String.valueOf(Messages.JpfTraceAspects_ProcessTagsD);
-        }
-
-        @Override
-        public Map<String, Object> resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            Map<String, Object> processTags = event.getField().getProcessTags();
-            return processTags == null ? Collections.emptyMap() : processTags;
-        }
-    }
-
-    private static class JpfTraceTagsAspect implements IJpfTraceAspect<Map<String, Object>> {
-
-        @Override
-        public String getName() {
-            return String.valueOf(Messages.JpfTraceAspects_Tags);
-        }
-
-        @Override
-        public String getHelpText() {
-            return String.valueOf(Messages.JpfTraceAspects_TagsD);
-        }
-
-        @Override
-        public Map<String, Object> resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            Map<String, Object> tags = event.getField().getTags();
-            return tags == null ? Collections.emptyMap() : tags;
+        public @Nullable Integer resolve(ITmfEvent event) {
+            if (!(event instanceof JpfTraceEvent)) {
+                return null;
+            }
+            return 0;
         }
     }
 }

@@ -2,16 +2,19 @@ package org.eclipse.tracecompass.incubator.internal.jpftrace.core.event;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.sql.Timestamp;
+// import java.util.Map.Entry;
+// import java.util.Objects;
+// import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+// import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
+
+import org.eclipse.tracecompass.analysis.os.linux.core.kernel.LinuxValues;
+import com.google.common.collect.ImmutableMap;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -23,46 +26,71 @@ import com.google.gson.JsonObject;
  */
 public class JpfTraceField {
 
-    private final String fOperationName;
+    private static final Map<@NonNull String, @NonNull Long> PREV_STATE_LUT;
+
+    static {
+        ImmutableMap.Builder<@NonNull String, @NonNull Long> builder = new ImmutableMap.Builder<>();
+
+        builder.put("START", (long) LinuxValues.TASK_STATE_RUNNING);
+        builder.put("LOCK", (long) LinuxValues.TASK_INTERRUPTIBLE);
+        PREV_STATE_LUT = builder.build();
+    }
+
+    private final String fType;
+    private final Integer fTransitionId;
+    private final Integer fThreadId;
     private final String fThreadName;
-    private final ITmfEventField fContent;
-    private final String fSpanId;
-    private final Long fStartTime;
-    private final Long fDuration;
-    private final @Nullable Map<String, Object> fTags;
-    private final @Nullable Map<String, Object> fProcessTags;
-    private String fProcessName;
+    private final long fTimestamp;
+    private final String fThreadState;
+
+    private final String fChoiceId;
+    private final ArrayList<String> fChoices;
+
+    private final ArrayList<String> fSteps;
+
+    private final ArrayList< Map<String, Object> > fInstructions;
+
+    private ITmfEventField fContent;
 
     private static final Gson G_SON = new Gson();
 
-    private static @Nullable Timestamp pseudoTime = null;
+    private static long pseudoTime = 0L;
+
+    private JpfTraceField(ArrayList<String> choices,
+    ArrayList<String> steps,
+    ArrayList<Map<String, Object> > insns,
+    Map<String, Object> fields) {
+        fType = (String) fields.get(IJpfTraceConstants.TYPE);
+        fTransitionId = (Integer) fields.get(IJpfTraceConstants.TRANSITION_ID);
+        fThreadId = (Integer) fields.get(IJpfTraceConstants.THREAD_ID);
+        fThreadName = (String) fields.get(IJpfTraceConstants.THREAD_NAME);
+        fThreadState = (String) fields.get(IJpfTraceConstants.THREAD_STATE);
+
+        fChoiceId = (String) fields.get(IJpfTraceConstants.CHOICE_ID);
+        fChoices = choices;
+
+        fSteps = steps;
+        fInstructions = insns;
+
+        fTimestamp = JpfTraceField.getPseudoTime() + 100 * fTransitionId;
+
+        ITmfEventField[] array = fields.entrySet().stream()
+                .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
+                .toArray(ITmfEventField[]::new);
+        fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array); 
+
+    }
 
     private static final void Log(String s){
         System.out.println(s);
     }
 
-    /** 
-     * pretend to move time to 100 nanoseconds later
-     */
-    private static final void TimeForward(){
-        if(pseudoTime != null){
-            pseudoTime.setNanos(pseudoTime.getNanos() + 100);
-            Log(String.valueOf(pseudoTime));
-        }
+    public static void setPseudoTime(long value) {
+        pseudoTime = value;
     }
 
-    /**
-     * Get the process id
-     *
-     * @param eventString
-     *            the event string
-     * @return the process id
-     */
-    public static @Nullable String getProcess(String eventString) {
-        @Nullable
-        JsonObject root = G_SON.fromJson(eventString, JsonObject.class);
-        String process = optString(root, IJpfTraceConstants.PROCESS_ID);
-        return process == null ? "" : process; 
+    public static long getPseudoTime() {
+        return pseudoTime;
     }
 
     /**
@@ -74,166 +102,131 @@ public class JpfTraceField {
      *            the process name and tags
      * @return an event field
      */
-    public static @Nullable JpfTraceField parseJson(String fieldsString, @Nullable String processField) {
+    public static @Nullable JpfTraceField parseJson(String fieldsString) {
         Log("JpfTraceField::parseJson");
 
         @Nullable
         JsonObject root = G_SON.fromJson(fieldsString, JsonObject.class);
 
-        // get base time stamp
-        // pass basic time from path
-        String time = optString(root, IJpfTraceConstants.BASE_TIME);
-        if(time != null){
-            Log("JpfTraceField::parseJson, timeString: " + time);
-            pseudoTime = Timestamp.valueOf(time);
-            Log("JpfTraceField::parseJson, pseudotime: " + String.valueOf(pseudoTime));
-            TimeForward();
-            Log("JpfTraceField::parseJson, pseudotime: " + String.valueOf(pseudoTime));
-        }
+        Integer transitionId = optInt(root, IJpfTraceConstants.TRANSITION_ID);
 
         // get thread info component
         JsonObject threadInfo = root.get(IJpfTraceConstants.THREAD_INFO).getAsJsonObject();
 
         // get thread name from threadInfo
         String threadName = optString(threadInfo, IJpfTraceConstants.THREAD_NAME);
-        String name = String.valueOf(threadName);
-        if(threadName != null){
-            Log("JpfTraceField::parseJson, name: " + threadName);
-        }
 
         // get thread ID from threadInfo
         Integer threadId = optInt(threadInfo, IJpfTraceConstants.THREAD_ID);
-        String traceId = String.valueOf(threadId);
-        if(threadId != Integer.MIN_VALUE){
-            Log("JpfTraceField::parseJson, id: " + String.valueOf(threadId));
+
+        String choiceId = optString(root, IJpfTraceConstants.CHOICE_ID);
+
+        ArrayList<String> choices = new ArrayList<>();
+        JsonArray choiceArray = optJSONArray(root, IJpfTraceConstants.CHOICES);
+        if (choiceArray != null) {
+            for (int i = 0; i < choiceArray.size(); i++ ) {
+                String choiceName = choiceArray.get(i).getAsString();
+                choices.add(choiceName);
+            }
         }
 
-        // get transitions array
-        JsonArray transitions = optJSONArray(root, IJpfTraceConstants.TRANSITIONS);
-        if(transitions != null){
-            Log("JpfTraceField::parseJson, numTran: " + String.valueOf(transitions.size()));
+        String threadState = optString(root, IJpfTraceConstants.THREAD_STATE);
+
+        ArrayList<String> steps = new ArrayList<>();
+        JsonArray stepArray = optJSONArray(root, IJpfTraceConstants.STEPS);
+        if(stepArray != null) {
+            for (int i = 0; i < stepArray.size(); i++) {
+                String step = stepArray.get(i).getAsString();
+                steps.add(step);
+            }
         }
+        Log("Number of Steps: " + String.valueOf(steps.size()));
 
-        
+        Integer numSrc = optInt(root, IJpfTraceConstants.SOURCES);
+        Log("Number of Sources: " + String.valueOf(numSrc));
 
+        ArrayList<Map<@NonNull String, @NonNull Object>> insns = new ArrayList<>();
+        JsonArray insnArray = optJSONArray(root, IJpfTraceConstants.INSTRUCTIONS);
+        if (insnArray != null) {
+            for (int i = 0; i < insnArray.size(); i++) {
+                Map<@NonNull String, @NonNull Object> insn = new HashMap<>();
+                
+                JsonObject insnObj = insnArray.get(i).getAsJsonObject();
+                Integer stepLocation = optInt(insnObj, IJpfTraceConstants.STEP_LOCATION);
+                insn.put(IJpfTraceConstants.STEP_LOCATION, stepLocation);
 
-        // Sample parsing 
-        // String name = String.valueOf(optString(root, IJpfTraceConstants.OPERATION_NAME));
-        if (name == "null") { 
-            return null;
-        }
-        // String traceId = optString(root, IJpfTraceConstants.TRACE_ID);
-        String spanId = optString(root, IJpfTraceConstants.SPAN_ID);
-        Integer flags = optInt(root, IJpfTraceConstants.FLAGS);
+                String fileLocation = optString(insnObj, IJpfTraceConstants.FILE_LOCATION);
+                insn.put(IJpfTraceConstants.FILE_LOCATION, fileLocation);
 
-        // parsing of basic components
+                Boolean isVirtualInv = optBoolean(insnObj, IJpfTraceConstants.IS_VIRTUAL_INV);
+                if (isVirtualInv != null){
+                    insn.put(IJpfTraceConstants.IS_VIRTUAL_INV, isVirtualInv);
+                }
 
-        Long startTime = optLong(root, IJpfTraceConstants.START_TIME);
-        if (Double.isFinite(startTime)) {
-            startTime = TmfTimestamp.fromMicros(startTime).toNanos();
-        }
-        Long duration = optLong(root, IJpfTraceConstants.DURATION);
-        if (Double.isFinite(duration)) {
-            duration = TmfTimestamp.fromMicros(duration).toNanos();
+                Boolean isFieldInst = optBoolean(insnObj, IJpfTraceConstants.IS_FIELD_INST);
+                if (isFieldInst != null) {
+                    insn.put(IJpfTraceConstants.IS_FIELD_INST, isFieldInst);
+                }
+
+                Boolean isLockInst = optBoolean(insnObj, IJpfTraceConstants.IS_LOCK_INST);
+                if (isFieldInst != null) {
+                    insn.put(IJpfTraceConstants.IS_LOCK_INST, isLockInst);
+                    if (isFieldInst) {
+                        String lockFieldname = optString(insnObj, IJpfTraceConstants.LOCK_FIELD_NAME);
+                        if (lockFieldname != null) {
+                            insn.put(IJpfTraceConstants.LOCK_FIELD_NAME, lockFieldname);
+                        }
+                    }
+                }
+
+                Boolean isJVMInvok = optBoolean(insnObj, IJpfTraceConstants.IS_JVM_INVOK);
+                if (isJVMInvok != null) {
+                    insn.put(IJpfTraceConstants.IS_JVM_INVOK, isJVMInvok);
+                }
+
+                Boolean isJVMReturn = optBoolean(insnObj, IJpfTraceConstants.IS_JVM_RETURN);
+                if (isJVMReturn != null) {
+                    insn.put(IJpfTraceConstants.IS_JVM_RETURN, isJVMReturn);
+                }
+
+                insns.add(insn);
+            }
         }
 
         Map<@NonNull String, @NonNull Object> fieldsMap = new HashMap<>();
 
-        JsonArray refs = optJSONArray(root, IJpfTraceConstants.REFERENCES);
-        if (refs != null) {
-            for (int i = 0; i < refs.size(); i++) {
-                String key = Objects.requireNonNull(refs.get(i).getAsJsonObject().get(IJpfTraceConstants.REFERENCE_TYPE).getAsString());
-                JsonElement element = Objects.requireNonNull(refs.get(i).getAsJsonObject().get(IJpfTraceConstants.SPAN_ID));
-                String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
-                fieldsMap.put(IJpfTraceConstants.REFERENCES + '/' + key, value);
-            }
+        fieldsMap.put(IJpfTraceConstants.TRANSITION_ID, transitionId);
+        fieldsMap.put(IJpfTraceConstants.THREAD_ID, threadId);
+        fieldsMap.put(IJpfTraceConstants.THREAD_NAME, threadName);
+        fieldsMap.put(IJpfTraceConstants.THREAD_STATE, threadState);
+
+        fieldsMap.put(IJpfTraceConstants.CHOICE_ID, choiceId);
+        
+        if (choiceId != null && choiceId.equals("START")) {
+            fieldsMap.put(IJpfTraceConstants.TYPE, "sched_wakeup");
+            String comm = optString(root, IJpfTraceConstants.COMM);
+            fieldsMap.put(IJpfTraceConstants.COMM, comm);
+            Integer pid = optInt(root, IJpfTraceConstants.PID);
+            fieldsMap.put(IJpfTraceConstants.PID, pid);
+            fieldsMap.put(IJpfTraceConstants.PRIO, 100);
+            fieldsMap.put(IJpfTraceConstants.SUCCESS, 1);
+            fieldsMap.put(IJpfTraceConstants.TARGET_CPU, 0);
+        } else {
+            fieldsMap.put(IJpfTraceConstants.TYPE, "sched_switch");
+            String prevComm = optString(root, IJpfTraceConstants.PREV_COMM);
+            fieldsMap.put(IJpfTraceConstants.PREV_COMM, prevComm);
+            Integer prevPid = optInt(root, IJpfTraceConstants.PREV_PID);
+            fieldsMap.put(IJpfTraceConstants.PREV_PID, prevPid);
+            String nextComm = optString(root, IJpfTraceConstants.NEXT_COMM);
+            fieldsMap.put(IJpfTraceConstants.NEXT_COMM, nextComm);
+            Integer nextPid = optInt(root, IJpfTraceConstants.NEXT_PID);
+            fieldsMap.put(IJpfTraceConstants.NEXT_PID, nextPid);
+
+            fieldsMap.put(IJpfTraceConstants.PREV_PRIO, 100);
+            fieldsMap.put(IJpfTraceConstants.NEXT_PRIO, 100);
+            fieldsMap.put(IJpfTraceConstants.PREV_STATE, PREV_STATE_LUT.getOrDefault(choiceId, 0L));
         }
-
-        JsonArray tags = optJSONArray(root, IJpfTraceConstants.TAGS);
-        if (tags != null) {
-            for (int i = 0; i < tags.size(); i++) {
-                String key = Objects.requireNonNull(tags.get(i).getAsJsonObject().get(IJpfTraceConstants.KEY).getAsString());
-                JsonElement element = Objects.requireNonNull(tags.get(i).getAsJsonObject().get(IJpfTraceConstants.VALUE));
-                String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
-                fieldsMap.put(IJpfTraceConstants.TAGS + '/' + key, value);
-            }
-        }
-
-        JsonArray logs = optJSONArray(root, IJpfTraceConstants.LOGS);
-        if (logs != null) {
-            Map<Long, Map<String, String>> timestampList = new HashMap();
-            for (int i = 0; i < logs.size(); i++) {
-                Long timestamp = optLong(logs.get(i).getAsJsonObject(), IJpfTraceConstants.TIMESTAMP);
-                if (Double.isFinite(timestamp)) {
-                    timestamp = TmfTimestamp.fromMicros(timestamp).toNanos();
-                }
-                JsonArray fields = Objects.requireNonNull(logs.get(i).getAsJsonObject().get(IJpfTraceConstants.FIELDS).getAsJsonArray());
-                Map<String, String> fieldsList = new HashMap();
-                for (int j = 0; j < fields.size(); j++) {
-                    String key = Objects.requireNonNull(fields.get(j).getAsJsonObject().get(IJpfTraceConstants.KEY).getAsString());
-                    JsonElement element = Objects.requireNonNull(fields.get(j).getAsJsonObject().get(IJpfTraceConstants.VALUE));
-                    String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
-                    fieldsList.put(key, value);
-                }
-                timestampList.put(timestamp.longValue(), fieldsList);
-            }
-            fieldsMap.put(IJpfTraceConstants.LOGS, timestampList);
-        }
-
-        // if (traceId == null || spanId == null) {
-        //     return null;
-        // }
-
-        fieldsMap.put(IJpfTraceConstants.OPERATION_NAME, name);
-        fieldsMap.put(IJpfTraceConstants.TRACE_ID, traceId);
-        fieldsMap.put(IJpfTraceConstants.SPAN_ID, spanId);
-        if (flags != Integer.MIN_VALUE) {
-            fieldsMap.put(IJpfTraceConstants.FLAGS, flags);
-        }
-        fieldsMap.put(IJpfTraceConstants.START_TIME, startTime);
-        fieldsMap.put(IJpfTraceConstants.DURATION, duration);
-
-        String processName = processField == null ? "" : parseProcess(processField, fieldsMap); 
-        fieldsMap.put(IJpfTraceConstants.PROCESS_NAME, processName);
-
-        return new JpfTraceField(name, threadName, fieldsMap, spanId, startTime, duration, processName);
-    }
-
-    /**
-     * Parse a JSON string of the process and add it in fieldsMap
-     *
-     * @param processField
-     *            the string
-     * @param fieldsMap
-     *            processes list
-     * @return the process name
-     */
-    public static String parseProcess(String processField, Map<String, Object> fieldsMap) {
-        @Nullable
-        JsonObject root = G_SON.fromJson(processField, JsonObject.class);
-
-        String name = String.valueOf(optString(root, IJpfTraceConstants.SERVICE_NAME));
-        if (name == "null") { 
-            return ""; 
-        }
-
-        JsonArray tags = optJSONArray(root, IJpfTraceConstants.TAGS);
-        if (tags != null) {
-            for (int i = 0; i < tags.size(); i++) {
-                String key = Objects.requireNonNull(tags.get(i).getAsJsonObject().get("key").getAsString()); 
-                JsonElement element = Objects.requireNonNull(tags.get(i).getAsJsonObject().get("value")); 
-                String value = String.valueOf(element.isJsonPrimitive() ? element.getAsJsonPrimitive().getAsString() : element.toString());
-                fieldsMap.put(IJpfTraceConstants.PROCESS_TAGS + '/' + key, value);
-            }
-        }
-
-        return name;
-
-    }
-
-    private static long optLong(JsonObject root, String key) {
-        JsonElement jsonElement = root.get(key);
-        return jsonElement != null ? jsonElement.getAsLong() : Long.MIN_VALUE;
+        return new JpfTraceField(choices, steps, insns, fieldsMap);
     }
 
     private static int optInt(JsonObject root, String key) {
@@ -251,62 +244,19 @@ public class JpfTraceField {
         return jsonElement != null ? jsonElement.getAsString() : null;
     }
 
-    /**
-     * Constructor
-     *
-     * @param name
-     *            operation name
-     * @param fields
-     *            span fields (arguments)
-     * @param spanId
-     *            the span id
-     * @param startTime
-     *            the span start time
-     * @param duration
-     *            the span duration
-     * @param processName
-     *            the span process name
-     */
-    private JpfTraceField(String name, String threadName, Map<String, Object> fields, String spanId, Long startTime, Long duration, String processName) {
-        fOperationName = name;
-        fThreadName = threadName;
-        ITmfEventField[] array = fields.entrySet().stream()
-                .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
-                .toArray(ITmfEventField[]::new);
-        fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array);
-        fSpanId = spanId;
-        fStartTime = startTime;
-        fDuration = duration;
-        @SuppressWarnings("null")
-        Map<@NonNull String, @NonNull Object> tags = fields.entrySet().stream()
-                .filter(entry -> {
-                    return entry.getKey().startsWith(IJpfTraceConstants.TAGS + '/');
-                })
-                .collect(Collectors.toMap(entry -> entry.getKey().substring(5), Entry::getValue));
-        fTags = tags.isEmpty() ? null : tags;
-        @SuppressWarnings("null")
-        Map<@NonNull String, @NonNull Object> processTags = fields.entrySet().stream()
-                .filter(entry -> {
-                    return entry.getKey().startsWith(IJpfTraceConstants.PROCESS_TAGS + '/');
-                })
-                .collect(Collectors.toMap(entry -> entry.getKey().substring(12), Entry::getValue));
-        fProcessTags = processTags.isEmpty() ? null : processTags;
-        fProcessName = processName;
+    private static @Nullable Boolean optBoolean(JsonObject root, String key) {
+        JsonElement jsonElement = root.get(key);
+        if (jsonElement != null) {
+            return jsonElement.getAsBoolean();
+        } 
+        
+        Log("WARNING: JpfTraceField::optBoolean: non-exist boolean requested");
+        return null;
     }
 
     public String getThreadName(){
         return fThreadName;
     }
-
-    /**
-     * Get the operation name
-     *
-     * @return the operation name
-     */
-    public String getName() {
-        return fOperationName;
-    }
-
     /**
      * Get the event content
      *
@@ -316,58 +266,35 @@ public class JpfTraceField {
         return fContent;
     }
 
-    /**
-     * Get the span id
-     *
-     * @return the span id
-     */
-    public String getSpanId() {
-        return fSpanId;
+    public long getTimestamp() {
+        return fTimestamp;
     }
 
-    /**
-     * Get the span start time
-     *
-     * @return the start time
-     */
-    public Long getStartTime() {
-        return fStartTime;
+    public String getName() {
+        return fType;
     }
 
-    /**
-     * Get the event duration
-     *
-     * @return the duration
-     */
-    public Long getDuration() {
-        return fDuration;
+    public int getThreadId() {
+        return fThreadId;
     }
 
-    /**
-     * Get the span tags
-     *
-     * @return a map of the tags and their field names
-     */
-    public @Nullable Map<String, Object> getTags() {
-        return fTags;
+    public String getThreadState() {
+        return fThreadState;
     }
 
-    /**
-     * Get the span process tags
-     *
-     * @return a map of the process tags and their field names
-     */
-    @Nullable
-    public Map<String, Object> getProcessTags() {
-        return fProcessTags;
+    public String getChoiceId() {
+        return fChoiceId;
     }
 
-    /**
-     * Get the span processName
-     *
-     * @return the process name
-     */
-    public String getProcessName() {
-        return fProcessName;
+    public int getNumSteps() {
+        return fSteps.size();
+    } 
+
+    public int getNumInstructions() {
+        return fInstructions.size();
+    }
+
+    public int getNumChoices() {
+        return fChoices.size();
     }
 }

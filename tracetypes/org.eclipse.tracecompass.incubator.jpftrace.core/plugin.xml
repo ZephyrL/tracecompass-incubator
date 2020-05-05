@@ -22,7 +22,7 @@
             name="%jpftrace.experiment.name">
       </experiment>
    </extension>
-   <extension
+   <!-- <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
             analysis_module="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.spanlife.SpanLifeAnalysis"
@@ -46,5 +46,5 @@
             class="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.spanlife.SpanLifeDataProviderFactory"
             id="org.eclipse.tracecompass.incubator.jpftrace.analysis.spanlife.dataprovider">
       </dataProviderFactory>
-   </extension>
+   </extension> -->
 </plugin>
