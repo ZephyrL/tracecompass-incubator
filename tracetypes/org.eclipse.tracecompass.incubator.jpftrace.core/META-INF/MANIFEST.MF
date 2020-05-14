@@ -21,5 +21,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.jpftrace.core,
  org.eclipse.tracecompass.incubator.internal.jpftrace.core.event,
- org.eclipse.tracecompass.incubator.internal.jpftrace.core.trace
+ org.eclipse.tracecompass.incubator.internal.jpftrace.core.trace,
+ org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.jpftrace.core

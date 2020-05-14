@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
+      <type
+            tracetype="org.eclipse.tracecompass.incubator.jpftrace.core">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfTraceControlFlowView"
+            class="org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfTraceControlFlowView"
+            icon="icons/life.png"
+            id="org.eclipse.tracecompass.incubator.jpftrace.ui.view"
+            name="JPF Control Flow View"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.tracecompass.tmf.core.dataprovider">
+      <dataProviderFactory
+            class="org.eclipse.tracecompass.incubator.internel.jpftrace.ui.view.JpfThreadStatusDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internel.jpftrace.ui.view.JpfThreadStatusDataProviderFactory">
+      </dataProviderFactory>
+   </extension>
+   <!-- <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="org.eclipse.tracecompass.incubator.jpftrace.ui.view">
+         <analysisModuleClass
+               class="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis">
+         </analysisModuleClass>
+      </output>
+   </extension> -->
+</plugin>

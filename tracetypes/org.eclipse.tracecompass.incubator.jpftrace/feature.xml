@@ -24,6 +24,9 @@
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.tracecompass.common.core"/>
       <import plugin="org.eclipse.tracecompass.tmf.core"/>
+      <import plugin="org.eclipse.tracecompass.analysis.os.linux.core"/>
+      <import plugin="org.eclipse.tracecompass.analysis.os.linux.ui"/>
+      <import plugin="org.eclipse.tracecompass.statesystem.core"/>
       <import plugin="com.google.gson"/>
       <import plugin="com.google.guava"/>
       <import plugin="org.apache.commons.lang3"/>
@@ -39,6 +42,13 @@
 
    <plugin
          id="org.eclipse.tracecompass.incubator.jpftrace.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.tracecompass.incubator.jpftrace.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
