@@ -79,7 +79,7 @@ import com.google.common.collect.TreeMultimap;
 
 public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider implements ITimeGraphDataProvider<@NonNull TimeGraphEntryModel>, IOutputStyleProvider {
 
-    public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfThreadStatusDataProvider"; //$NON-NLS-1$
+    public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfThreadStatusDataProviderFactory"; //$NON-NLS-1$
 
     public static final @NonNull String CPU = "cpu"; //$NON-NLS-1$
 

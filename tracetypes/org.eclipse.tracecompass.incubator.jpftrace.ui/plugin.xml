@@ -21,8 +21,8 @@
    <extension
          point="org.eclipse.tracecompass.tmf.core.dataprovider">
       <dataProviderFactory
-            class="org.eclipse.tracecompass.incubator.internel.jpftrace.ui.view.JpfThreadStatusDataProviderFactory"
-            id="org.eclipse.tracecompass.incubator.internel.jpftrace.ui.view.JpfThreadStatusDataProviderFactory">
+            class="org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfThreadStatusDataProviderFactory"
+            id="org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfThreadStatusDataProviderFactory">
       </dataProviderFactory>
    </extension>
    <!-- <extension

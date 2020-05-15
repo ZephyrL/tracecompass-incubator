@@ -28,8 +28,11 @@ public class JpfThreadStatusDataProviderFactory implements IDataProviderFactory 
     @Override
     public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(@NonNull ITmfTrace trace) {
         KernelAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
+        System.out.println("JPFFactory::createProvider: called");
         if (module != null) {
             module.schedule();
+            // check this function is called
+            System.out.println("JPFFactory::createProvider: module exists");
             return new JpfThreadStatusDataProvider(trace, module);
         }
 
