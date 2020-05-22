@@ -20,7 +20,6 @@ import java.util.function.Predicate;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.Activator;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.Attributes;
@@ -30,6 +29,10 @@ import org.eclipse.tracecompass.internal.tmf.core.analysis.callsite.CallsiteAnal
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.registry.LinuxStyle;
 import org.eclipse.tracecompass.internal.tmf.core.model.AbstractTmfTraceDataProvider;
 import org.eclipse.tracecompass.internal.tmf.core.model.filters.FetchParametersUtils;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.Annotation;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.AnnotationCategoriesModel;
+import org.eclipse.tracecompass.internal.provisional.tmf.core.model.annotations.IOutputAnnotationProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.StateSystemUtils.QuarkIterator;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
@@ -66,6 +69,9 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfKernelAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.ui.style.JpfThreadStyle;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
@@ -77,7 +83,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeMultimap;
 
-public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider implements ITimeGraphDataProvider<@NonNull TimeGraphEntryModel>, IOutputStyleProvider {
+public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider implements 
+    ITimeGraphDataProvider<@NonNull TimeGraphEntryModel>, 
+    IOutputStyleProvider,
+    IOutputAnnotationProvider {
 
     public static final @NonNull String ID = "org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfThreadStatusDataProviderFactory"; //$NON-NLS-1$
 
@@ -107,10 +116,12 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
         builder.put(LinuxStyle.WAIT_FOR_CPU.getLabel(), new OutputElementStyle(null, LinuxStyle.WAIT_FOR_CPU.toMap()));
         builder.put(LinuxStyle.WAIT_UNKNOWN.getLabel(), new OutputElementStyle(null, LinuxStyle.WAIT_UNKNOWN.toMap()));
         builder.put(LinuxStyle.LINK.getLabel(), new OutputElementStyle(null, LinuxStyle.LINK.toMap()));
+        builder.put(JpfThreadStyle.LOCK.getLabel(), new OutputElementStyle(null, JpfThreadStyle.LOCK.toMap()));
+        builder.put(JpfThreadStyle.EXPOSE.getLabel(), new OutputElementStyle(null, JpfThreadStyle.EXPOSE.toMap()));
         STATE_MAP = builder.build();
     }
 
-    private final KernelAnalysisModule fModule;
+    private final JpfKernelAnalysisModule fModule;
     private final long fTraceId = fAtomicLong.getAndIncrement();
 
     private final Map<Long, Integer> fQuarkMap = new HashMap<>();
@@ -126,8 +137,11 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     private final Map<Long, @NonNull Multimap<@NonNull String, @NonNull Object>> fEntryMetadata = new HashMap<>();
 
+    private final @NonNull List<String> ANNOTATION_CAT_LIST = new ArrayList<>();
 
-    public JpfThreadStatusDataProvider(@NonNull ITmfTrace trace, KernelAnalysisModule module) {
+    private final @NonNull Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>();
+
+    public JpfThreadStatusDataProvider(@NonNull ITmfTrace trace, JpfKernelAnalysisModule module) {
         super(trace);
         fModule = module;
         System.out.println("JpfThreadStatusDataProvider::constructor");
@@ -663,4 +677,18 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
         return new TmfModelResponse<>(new OutputStyleModel(STATE_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
+    // ANNOTATION_CAT_LIST: List<String>
+    @Override
+    public TmfModelResponse<AnnotationCategoriesModel> fetchAnnotationCategories(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        System.out.println("JpfThreadStatusDataProvider::fetchAnnotationCategories");
+        return new TmfModelResponse<>(new AnnotationCategoriesModel(ANNOTATION_CAT_LIST), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+    }
+
+    // ANNOTATION_MAP: Map<String, Collection<Annotation>>
+    @Override
+    public TmfModelResponse<AnnotationModel> fetchAnnotations(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
+        System.out.println("JpfThreadStatusDataProvider::fetchAnnotations");   
+        return new TmfModelResponse<>(new AnnotationModel(ANNOTATION_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+    }
+ 
 }

@@ -11,8 +11,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.tracecompass.common.core,
- org.eclipse.tracecompass.tmf.core,
  org.eclipse.tracecompass.analysis.os.linux.core,
+ org.eclipse.tracecompass.analysis.os.linux.ui,
+ org.eclipse.tracecompass.tmf.ui,
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.tracecompass.statesystem.core,
  com.google.gson,
  com.google.guava,
  org.apache.commons.lang3,
@@ -22,5 +25,6 @@ Require-Bundle: org.eclipse.core.runtime,
 Export-Package: org.eclipse.tracecompass.incubator.internal.jpftrace.core,
  org.eclipse.tracecompass.incubator.internal.jpftrace.core.event,
  org.eclipse.tracecompass.incubator.internal.jpftrace.core.trace,
- org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout
+ org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout,
+ org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.jpftrace.core

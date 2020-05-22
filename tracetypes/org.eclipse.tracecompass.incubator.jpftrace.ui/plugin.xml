@@ -25,6 +25,8 @@
             id="org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view.JpfThreadStatusDataProviderFactory">
       </dataProviderFactory>
    </extension>
+
+
    <!-- <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <output

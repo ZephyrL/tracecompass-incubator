@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.analysis.os.linux.core.kernel.KernelAnalysisModule;
 import org.eclipse.tracecompass.internal.tmf.core.model.DataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor;
 import org.eclipse.tracecompass.tmf.core.dataprovider.IDataProviderDescriptor.ProviderType;
@@ -15,6 +14,8 @@ import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataModel;
 import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
+
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfKernelAnalysisModule;
 
 public class JpfThreadStatusDataProviderFactory implements IDataProviderFactory {
 
@@ -27,7 +28,7 @@ public class JpfThreadStatusDataProviderFactory implements IDataProviderFactory 
 
     @Override
     public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(@NonNull ITmfTrace trace) {
-        KernelAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
+        JpfKernelAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, JpfKernelAnalysisModule.class, JpfKernelAnalysisModule.ID);
         System.out.println("JPFFactory::createProvider: called");
         if (module != null) {
             module.schedule();
@@ -41,7 +42,7 @@ public class JpfThreadStatusDataProviderFactory implements IDataProviderFactory 
 
     @Override
     public Collection<IDataProviderDescriptor> getDescriptors(@NonNull ITmfTrace trace) {
-        KernelAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, KernelAnalysisModule.class, KernelAnalysisModule.ID);
+        JpfKernelAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, JpfKernelAnalysisModule.class, JpfKernelAnalysisModule.ID);
         return module != null ? Collections.singletonList(DESCRIPTOR) : Collections.emptyList();
     }
 

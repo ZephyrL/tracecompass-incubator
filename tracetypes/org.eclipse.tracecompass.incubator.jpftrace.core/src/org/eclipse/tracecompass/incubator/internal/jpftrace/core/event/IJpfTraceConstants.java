@@ -73,4 +73,6 @@ public interface IJpfTraceConstants {
     String TARGET_CPU = "target_cpu";
 
     String DURATION = "duration";
+
+    String THREAD_SWITCH = "switch_thread";
 }

@@ -25,5 +25,6 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.lang3,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 Export-Package: org.eclipse.tracecompass.incubator.internal.jpftrace.ui;x-internal:=true,
- org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view
+ org.eclipse.tracecompass.incubator.internal.jpftrace.ui.view,
+ org.eclipse.tracecompass.incubator.internal.jpftrace.ui.style
 Automatic-Module-Name: org.eclipse.tracecompass.incubator.jpftrace.ui

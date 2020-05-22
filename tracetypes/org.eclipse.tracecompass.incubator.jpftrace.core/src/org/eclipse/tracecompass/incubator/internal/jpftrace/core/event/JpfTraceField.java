@@ -203,7 +203,7 @@ public class JpfTraceField {
         fieldsMap.put(IJpfTraceConstants.CHOICE_ID, choiceId);
         
         if (choiceId != null && choiceId.equals("START")) {
-            fieldsMap.put(IJpfTraceConstants.TYPE, "sched_wakeup");
+            fieldsMap.put(IJpfTraceConstants.TYPE, "THREAD_START");
             String comm = optString(root, IJpfTraceConstants.COMM);
             fieldsMap.put(IJpfTraceConstants.COMM, comm);
             Integer pid = optInt(root, IJpfTraceConstants.PID);
@@ -211,8 +211,8 @@ public class JpfTraceField {
             fieldsMap.put(IJpfTraceConstants.PRIO, 100);
             fieldsMap.put(IJpfTraceConstants.SUCCESS, 1);
             fieldsMap.put(IJpfTraceConstants.TARGET_CPU, 0);
-        } else {
-            fieldsMap.put(IJpfTraceConstants.TYPE, "sched_switch");
+        } else if (optBoolean(root, IJpfTraceConstants.THREAD_SWITCH) != null) {
+            fieldsMap.put(IJpfTraceConstants.TYPE, "THREAD_SWITCH");
             String prevComm = optString(root, IJpfTraceConstants.PREV_COMM);
             fieldsMap.put(IJpfTraceConstants.PREV_COMM, prevComm);
             Integer prevPid = optInt(root, IJpfTraceConstants.PREV_PID);
@@ -225,6 +225,8 @@ public class JpfTraceField {
             fieldsMap.put(IJpfTraceConstants.PREV_PRIO, 100);
             fieldsMap.put(IJpfTraceConstants.NEXT_PRIO, 100);
             fieldsMap.put(IJpfTraceConstants.PREV_STATE, PREV_STATE_LUT.getOrDefault(choiceId, 0L));
+        } else {
+            fieldsMap.put(IJpfTraceConstants.TYPE, choiceId);
         }
         return new JpfTraceField(choices, steps, insns, fieldsMap);
     }

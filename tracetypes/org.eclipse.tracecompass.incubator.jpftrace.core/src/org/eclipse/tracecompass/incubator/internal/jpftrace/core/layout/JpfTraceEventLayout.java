@@ -11,6 +11,10 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
     // private static final @NonNull String CHILD_TID = "child_pid"; //$NON-NLS-1$
     private static final @NonNull String TID = "pid"; //$NON-NLS-1$
     private static final @NonNull String CPU_FREQUENCY = "cpu_frequency"; //$NON-NLS-1$
+    private static final @NonNull String THREAD_SWITCH = "THREAD_SWITCH";
+    private static final @NonNull String THREAD_START = "THREAD_START";
+    private static final @NonNull String LOCK = "LOCK";
+    private static final @NonNull String EXPOSE = "EXPOSE";
     private static @Nullable JpfTraceEventLayout INSTANCE;
 
     public static synchronized @NonNull JpfTraceEventLayout getInstance() {
@@ -50,5 +54,28 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
     @Override
     public @NonNull String eventCpuFrequency() {
         return CPU_FREQUENCY;
+    }
+
+    @Override 
+    public @NonNull String eventSchedSwitch() {
+        return THREAD_SWITCH;
+    }
+
+    @Override
+    public @NonNull String eventSchedProcessWakeup() {
+        return THREAD_START;
+    }
+
+    @Override
+    public @NonNull String eventSchedProcessWaking() {
+        return THREAD_START;
+    }
+
+    public @NonNull String eventThreadLock() {
+        return LOCK;
+    }
+
+    public @NonNull String eventThreadExpose() {
+        return EXPOSE;
     }
 }
