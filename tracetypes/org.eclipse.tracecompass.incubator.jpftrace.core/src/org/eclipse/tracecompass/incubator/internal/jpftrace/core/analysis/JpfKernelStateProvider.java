@@ -50,6 +50,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadLockHandler;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadExposeHandler;
 
 /**
  * This is the state change input plugin for the state system which handles the
@@ -75,6 +76,7 @@ import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handle
  * |  |  |- SYSTEM_CALL
  * |  |  |- CURRENT_CPU_RQ
  * |  |  |- PID -> The process ID. If absent, the thread is a process
+ * |  |  |- LOCK/EXPOSE -> Timestamp of these events
  * </pre>
  *
  * @author Alexandre Montplaisir
@@ -150,6 +152,7 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
             builder.put(jpfLayout.eventSchedMigrateTask(), new SchedMigrateTaskHandler(layout));
             builder.put(jpfLayout.eventCpuFrequency(), new CpuFrequencyHandler(layout));
             builder.put(jpfLayout.eventThreadLock(), new ThreadLockHandler(layout));
+            builder.put(jpfLayout.eventThreadExpose(), new ThreadExposeHandler(layout));
         }
 
         for (String s : layout.getIPIIrqVectorsEntries()) {

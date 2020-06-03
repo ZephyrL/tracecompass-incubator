@@ -5,11 +5,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
-/**
- * JPF trace span (event)
- *
- * @author Katherine Nadeau
- */
 public class JpfTraceEvent extends TmfEvent {
 
     private final String fName;

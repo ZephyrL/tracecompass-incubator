@@ -13,23 +13,10 @@ import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 
 import com.google.common.collect.ImmutableList;
 
-/**
- * Aspects for Trace Compass Logs
- *
- * @author Katherine Nadeau
- */
 public class JpfTraceAspects {
 
-    /**
-     * Apects of a trace
-     */
     private static @Nullable Iterable<@NonNull ITmfEventAspect<?>> aspects;
 
-    /**
-     * Get the event aspects
-     *
-     * @return get the event aspects
-     */
     public static Iterable<@NonNull ITmfEventAspect<?>> getAspects() {
         Iterable<@NonNull ITmfEventAspect<?>> aspectSet = aspects;
         if (aspectSet == null) {

@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.model.ProcessStatus;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.Activator;
-import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.Attributes;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.StateValues;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.threadstatus.ThreadEntryModel;
 import org.eclipse.tracecompass.internal.tmf.core.analysis.callsite.CallsiteAnalysis;
@@ -70,6 +69,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfKernelAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.Attributes;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.ui.style.JpfThreadStyle;
 
 import com.google.common.collect.ImmutableList;
@@ -102,6 +102,8 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     private static final @NonNull Map<@NonNull String, @NonNull OutputElementStyle> STATE_MAP;
     private static final int LINK_VALUE = 8;
+    private static final int LOCK_VALUE = 9;
+    private static final int EXPOSE_VALUE = 10;
 
     private static final @NonNull Map<@NonNull String, @NonNull OutputElementStyle> STYLE_MAP = Collections.synchronizedMap(new HashMap<>());
 
@@ -137,9 +139,17 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     private final Map<Long, @NonNull Multimap<@NonNull String, @NonNull Object>> fEntryMetadata = new HashMap<>();
 
-    private final @NonNull List<String> ANNOTATION_CAT_LIST = new ArrayList<>();
+    private static final @NonNull List<String> ANNOTATION_CAT_LIST;
 
-    private final @NonNull Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>();
+    static {
+        ImmutableList.Builder<@NonNull String> builder = new ImmutableList.Builder<>();
+
+        builder.add(JpfThreadStyle.LOCK.getLabel());
+        builder.add(JpfThreadStyle.EXPOSE.getLabel());
+        ANNOTATION_CAT_LIST = builder.build();
+    }
+
+    // private final @NonNull Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>();
 
     public JpfThreadStatusDataProvider(@NonNull ITmfTrace trace, JpfKernelAnalysisModule module) {
         super(trace);
@@ -498,6 +508,10 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
             return LinuxStyle.WAIT_UNKNOWN.getLabel();
         case LINK_VALUE:
             return LinuxStyle.LINK.getLabel();
+        case LOCK_VALUE:
+            return JpfThreadStyle.LOCK.getLabel();
+        case EXPOSE_VALUE:
+            return JpfThreadStyle.EXPOSE.getLabel();
         default:
             return LinuxStyle.UNKNOWN.getLabel();
         }
@@ -578,6 +592,7 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
             if (tid != null && tid > 0) {
                 nextEntry = findEntry(tid, time);
                 if (prevEntry >= 0 && nextEntry >= 0) {
+                    // System.out.println("prevE: " + String.valueOf(prevEntry) + " nextE: " + String.valueOf(nextEntry));
                     TimeGraphArrow arrow = new TimeGraphArrow(prevEntry, nextEntry, prevEnd, time - prevEnd, getElementStyle(LINK_VALUE));
                     linkList.add(arrow);
                 }
@@ -681,6 +696,7 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
     @Override
     public TmfModelResponse<AnnotationCategoriesModel> fetchAnnotationCategories(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         System.out.println("JpfThreadStatusDataProvider::fetchAnnotationCategories");
+        System.out.println("Category size: " + String.valueOf(ANNOTATION_CAT_LIST.size()));
         return new TmfModelResponse<>(new AnnotationCategoriesModel(ANNOTATION_CAT_LIST), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
@@ -688,7 +704,76 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
     @Override
     public TmfModelResponse<AnnotationModel> fetchAnnotations(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
         System.out.println("JpfThreadStatusDataProvider::fetchAnnotations");   
+        ITmfStateSystem ss = fModule.getStateSystem();
+        if (ss == null) {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
+        }
+
+        List<Integer> tidQuarks = ss.getQuarks(Attributes.CPUS, WILDCARD, Attributes.CURRENT_THREAD);
+        Integer tidQuark = -1;
+        if (tidQuarks.size() > 0){
+            tidQuark = tidQuarks.get(0);
+        } else {
+            return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.STATE_SYSTEM_FAILED);
+        }
+
+        // Map<String, Collection<Annotation>> ret = new HashMap<>();
+        List<Integer> lockQuarks = ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.LOCK);
+        List<Integer> exposeQuarks = ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.EXPOSE);
+        TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(fetchParameters);
+        Collection<Long> times = getTimes(ss, filter);
+
+        Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>();
+        Collection<Annotation> lockCollection = new ArrayList<>();
+        Collection<Annotation> exposeCollection = new ArrayList<>();
+
+        for (Long t : times) {
+
+            Integer tid = -1;
+            try {
+                ITmfStateInterval currentThreadInterval = ss.querySingleState(t, tidQuark);
+                tid = (Integer)currentThreadInterval.getValue();
+                if (tid == null) {
+                    return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.STATE_SYSTEM_FAILED);
+                }
+            } catch(TimeRangeException | StateSystemDisposedException e) {
+                return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
+            }
+
+            for (Integer quark : lockQuarks) {
+                try {
+                    ITmfStateInterval lockEventInterval = ss.querySingleState(t, quark);
+                    Long time = (Long)lockEventInterval.getValue();
+                    if (time != null && t.equals(time)) {
+                        System.out.println("JpfThreadStatusDataProvider::FetchAnnotation: LOCK event timestamp matches");
+                        // Annotation anno = new Annotation(timestamp, 0, entryId, label, getElementStyle(JpfThreadStyle.LOCK.getLabel()))
+                        Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.LOCK.getLabel(), getElementStyle(LOCK_VALUE));
+                        lockCollection.add(anno);
+                    }
+                } catch (TimeRangeException | StateSystemDisposedException e) {
+                    return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
+                }
+            }
+
+            for (Integer quark : exposeQuarks) {
+                try {
+                    ITmfStateInterval exposeEventInterval = ss.querySingleState(t, quark);
+                    Long time = (Long)exposeEventInterval.getValue();
+                    if (time != null && t.equals(time)) {
+                        System.out.println("JpfThreadStatusDataProvider::FetchAnnotation: EXPOSE event timestamp matches");
+                        Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.EXPOSE.getLabel(), getElementStyle(EXPOSE_VALUE));
+                        exposeCollection.add(anno);
+                    }
+                } catch (TimeRangeException | StateSystemDisposedException e) {
+                    return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
+                }
+            }
+        }
+
+        ANNOTATION_MAP.put(JpfThreadStyle.LOCK.getLabel(), lockCollection);      
+        ANNOTATION_MAP.put(JpfThreadStyle.EXPOSE.getLabel(), exposeCollection);            
         return new TmfModelResponse<>(new AnnotationModel(ANNOTATION_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+
     }
  
 }

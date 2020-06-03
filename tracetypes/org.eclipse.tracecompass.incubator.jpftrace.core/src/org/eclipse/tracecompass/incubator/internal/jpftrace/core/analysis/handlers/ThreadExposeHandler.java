@@ -12,9 +12,9 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.Attributes;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.IJpfTraceConstants;
 
-public class ThreadLockHandler extends KernelEventHandler {
-
-    public ThreadLockHandler(IKernelAnalysisEventLayout layout) {
+public class ThreadExposeHandler extends KernelEventHandler {
+    
+    public ThreadExposeHandler(IKernelAnalysisEventLayout layout) {
         super(layout);
     }
 
@@ -31,13 +31,13 @@ public class ThreadLockHandler extends KernelEventHandler {
 
         String threadAttributeName = Attributes.buildThreadAttributeName(tid, cpu);
         final int threadNode = ss.getQuarkRelativeAndAdd(KernelEventHandlerUtils.getNodeThreads(ss), threadAttributeName);
-        final int lockEvent = ss.getQuarkRelativeAndAdd(threadNode, Attributes.LOCK);
+        final int exposeEvent = ss.getQuarkRelativeAndAdd(threadNode, Attributes.EXPOSE);
 
-        ss.modifyAttribute(timestamp, timestamp, lockEvent);
+        ss.modifyAttribute(timestamp, timestamp, exposeEvent);
 
-        ITmfStateValue value = ss.queryOngoingState(lockEvent);
-        System.out.println("ThreadLockHandler::value " + String.valueOf(value.unboxValue()));
+        ITmfStateValue value = ss.queryOngoingState(exposeEvent);
+        System.out.println("ThreadExposeHandler::value " + String.valueOf(value.unboxValue()));
 
-        System.out.println("ThreadLockHandler::handleEvent " + String.valueOf(tid) + " " + event.getContent().getName());
+        System.out.println("ThreadExposeHandler::handleEvent " + String.valueOf(tid) + " " + event.getContent().getName());
     }
 }

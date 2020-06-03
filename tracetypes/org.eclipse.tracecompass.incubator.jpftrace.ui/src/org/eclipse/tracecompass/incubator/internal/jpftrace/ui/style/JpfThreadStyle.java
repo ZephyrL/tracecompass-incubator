@@ -9,9 +9,9 @@ import com.google.common.collect.ImmutableMap;
 
 public enum JpfThreadStyle {
 
-    LOCK(String.valueOf(Messages.JpfThreadStyle_lock), 255, 100, 0, 255, 0.5f, StyleProperties.SymbolType.CIRCLE),
+    LOCK(String.valueOf(Messages.JpfThreadStyle_lock), 0, 100, 200, 255, 0.25f, StyleProperties.SymbolType.DIAMOND),
 
-    EXPOSE(String.valueOf(Messages.JpfThreadStyle_expose), 255, 0, 100, 255, 0.5f, StyleProperties.SymbolType.DIAMOND);
+    EXPOSE(String.valueOf(Messages.JpfThreadStyle_expose), 255, 0, 100, 255, 0.25f, StyleProperties.SymbolType.DIAMOND);
 
     private final Map<String, Object> fMap;
     
