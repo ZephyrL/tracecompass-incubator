@@ -51,6 +51,7 @@ public class JpfTraceField {
     private final ArrayList< Map<String, Object> > fInstructions;
 
     private ITmfEventField fContent;
+    private ITmfEventField fSources;
 
     private static final Gson G_SON = new Gson();
 
@@ -77,8 +78,30 @@ public class JpfTraceField {
         ITmfEventField[] array = fields.entrySet().stream()
                 .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
                 .toArray(ITmfEventField[]::new);
+
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array); 
 
+        Map<String, Object> sourceMap = new HashMap<>();
+
+        for (int i = 0; i < 4 && i < steps.size(); i++) {
+            String key = "Source#" + String.valueOf(i);
+            sourceMap.put(key, steps.get(i));
+        }
+        ITmfEventField[] sourceArray = sourceMap.entrySet().stream()
+                .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
+                .toArray(ITmfEventField[]::new);
+        fSources = new TmfEventField("Sources", null, sourceArray);
+
+        // StringBuilder sb = new StringBuilder(); 
+        // // put at most 4 source lines to the field contents
+        // for(int i = 0; i< 4 && i < steps.size(); i++) {
+        //     sb.append("Source#")
+        //     .append(String.valueOf(i))
+        //     .append(":")
+        //     .append(steps.get(i))
+        //     .append("\n");
+        // }
+        // fSources = sb.toString();
     }
 
     private static final void Log(String s){
@@ -266,6 +289,10 @@ public class JpfTraceField {
      */
     public ITmfEventField getContent() {
         return fContent;
+    }
+
+    public ITmfEventField getSources() {
+        return fSources;
     }
 
     public long getTimestamp() {

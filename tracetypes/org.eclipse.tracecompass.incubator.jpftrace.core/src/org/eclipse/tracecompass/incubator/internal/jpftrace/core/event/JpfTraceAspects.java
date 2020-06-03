@@ -7,6 +7,7 @@ package org.eclipse.tracecompass.incubator.internal.jpftrace.core.event;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
@@ -28,7 +29,8 @@ public class JpfTraceAspects {
                     new JpfTraceCpuAspect(),
                     new JpfTraceThreadStateAspect(),
                     new JpfTraceThreadNameAspect(),
-                    new JpfTraceChoiceAspect()
+                    new JpfTraceChoiceAspect(),
+                    new JpfTraceSourceAspect()
                     );
             aspects = aspectSet;
         }
@@ -106,6 +108,30 @@ public class JpfTraceAspects {
             return event.getField().getChoiceId();
         }
     }
+
+    private static class JpfTraceSourceAspect implements IJpfTraceAspect<ITmfEventField> {
+        @Override
+        public @NonNull String getName() {
+            return String.valueOf(Messages.JpfTraceAspects_Source);
+        }
+
+        @Override
+        public @NonNull String getHelpText() {
+            return String.valueOf(Messages.JpfTraceAspects_SourceD);
+        }
+
+        @Override 
+        public ITmfEventField resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
+            return event.getField().getSources();
+        }
+    }
+
+    // private static final TmfEventFieldAspect SOURCE_ASPECT = new TmfEventFieldAspect(String.valueOf(Messages.JpfTraceAspects_Source), null, event -> event.getField().getSources()) {
+    //     @Override
+    //     public String getHelpText() {
+    //         return String.valueOf(Messages.JpfTraceAspects_SourceD);
+    //     }
+    // };
 
     private static class JpfTraceCpuAspect extends TmfCpuAspect {
         @Override

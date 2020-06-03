@@ -11,7 +11,7 @@ public enum JpfThreadStyle {
 
     LOCK(String.valueOf(Messages.JpfThreadStyle_lock), 0, 100, 200, 255, 0.25f, StyleProperties.SymbolType.DIAMOND),
 
-    EXPOSE(String.valueOf(Messages.JpfThreadStyle_expose), 255, 0, 100, 255, 0.25f, StyleProperties.SymbolType.DIAMOND);
+    EXPOSE(String.valueOf(Messages.JpfThreadStyle_expose), 255, 0, 100, 255, 0.25f, StyleProperties.SymbolType.CIRCLE);
 
     private final Map<String, Object> fMap;
     
