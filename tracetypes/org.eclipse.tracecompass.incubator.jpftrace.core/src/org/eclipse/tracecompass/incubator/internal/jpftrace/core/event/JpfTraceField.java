@@ -56,7 +56,7 @@ public class JpfTraceField {
 
     private static final Gson G_SON = new Gson();
 
-    private static long pseudoTime = 0L;
+    private static Long pseudoTime = 0L;
 
     private JpfTraceField(ArrayList<String> choices,
     ArrayList<String> steps,
@@ -74,7 +74,11 @@ public class JpfTraceField {
         fSteps = steps;
         fInstructions = insns;
 
-        fTimestamp = JpfTraceField.getPseudoTime() + 100 * fTransitionId;
+        fTimestamp = JpfTraceField.getPseudoTime();
+        Long duration = (Long) fields.get(IJpfTraceConstants.DURATION);
+        if (duration != null) {
+            JpfTraceField.setPseudoTime(fTimestamp + duration);
+        }
 
         ITmfEventField[] array = fields.entrySet().stream()
                 .map(entry -> new TmfEventField(entry.getKey(), entry.getValue(), null))
@@ -170,10 +174,8 @@ public class JpfTraceField {
                 steps.add(step);
             }
         }
-        Log("Number of Steps: " + String.valueOf(steps.size()));
 
-        Integer numSteps = optInt(root, IJpfTraceConstants.NUM_STEPS);
-        Log("Number of Sources: " + String.valueOf(numSteps));
+        // Integer numSteps = optInt(root, IJpfTraceConstants.NUM_STEPS);
 
         // get instructions
         ArrayList<Map<@NonNull String, @NonNull Object>> insns = new ArrayList<>();
@@ -288,6 +290,9 @@ public class JpfTraceField {
         fieldsMap.put(IJpfTraceConstants.CHOICE_ID, choiceId);
         if (currentChoice != null)
             fieldsMap.put(IJpfTraceConstants.CURRENT_CHOICE, currentChoice);
+
+        Long duration = new Long(steps.size() * 10);
+        fieldsMap.put(IJpfTraceConstants.DURATION, duration);
         
         if (choiceId != null && (choiceId.equals("START") || choiceId.equals("JOIN"))) {
             fieldsMap.put(IJpfTraceConstants.TYPE, "THREAD_START");
@@ -389,5 +394,9 @@ public class JpfTraceField {
 
     public int getNumChoices() {
         return fChoices.size();
+    }
+
+    public int getTransitionId() {
+        return fTransitionId;
     }
 }
