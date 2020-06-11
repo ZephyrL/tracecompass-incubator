@@ -21,6 +21,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+// import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
 /**
  * JPF Trace fields.
  */
@@ -142,6 +143,11 @@ public class JpfTraceField {
         // get thread ID from threadInfo
         Integer threadId = optInt(threadInfo, IJpfTraceConstants.THREAD_ID);
 
+        String threadState = optString(threadInfo, IJpfTraceConstants.THREAD_STATE);
+
+        String threadEntryMethod = optString(threadInfo, IJpfTraceConstants.THREAD_ENTRY_METHOD);
+
+        // get choice generator information
         String choiceId = optString(root, IJpfTraceConstants.CHOICE_ID);
 
         ArrayList<String> choices = new ArrayList<>();
@@ -153,8 +159,9 @@ public class JpfTraceField {
             }
         }
 
-        String threadState = optString(root, IJpfTraceConstants.THREAD_STATE);
+        String currentChoice = optString(root, IJpfTraceConstants.CURRENT_CHOICE);
 
+        // get steps
         ArrayList<String> steps = new ArrayList<>();
         JsonArray stepArray = optJSONArray(root, IJpfTraceConstants.STEPS);
         if(stepArray != null) {
@@ -165,15 +172,17 @@ public class JpfTraceField {
         }
         Log("Number of Steps: " + String.valueOf(steps.size()));
 
-        Integer numSrc = optInt(root, IJpfTraceConstants.SOURCES);
-        Log("Number of Sources: " + String.valueOf(numSrc));
+        Integer numSteps = optInt(root, IJpfTraceConstants.NUM_STEPS);
+        Log("Number of Sources: " + String.valueOf(numSteps));
 
+        // get instructions
         ArrayList<Map<@NonNull String, @NonNull Object>> insns = new ArrayList<>();
         JsonArray insnArray = optJSONArray(root, IJpfTraceConstants.INSTRUCTIONS);
         if (insnArray != null) {
             for (int i = 0; i < insnArray.size(); i++) {
                 Map<@NonNull String, @NonNull Object> insn = new HashMap<>();
                 
+                // parse insn metadata
                 JsonObject insnObj = insnArray.get(i).getAsJsonObject();
                 Integer stepLocation = optInt(insnObj, IJpfTraceConstants.STEP_LOCATION);
                 insn.put(IJpfTraceConstants.STEP_LOCATION, stepLocation);
@@ -212,6 +221,56 @@ public class JpfTraceField {
                     insn.put(IJpfTraceConstants.IS_JVM_RETURN, isJVMReturn);
                 }
 
+                Boolean isSync = optBoolean(insnObj, IJpfTraceConstants.IS_SYNCHRONIZED);
+                if (isSync != null) {
+                    insn.put(IJpfTraceConstants.IS_SYNCHRONIZED, isSync);
+                }
+
+                String syncMethodName = optString(insnObj, IJpfTraceConstants.SYNC_METHOD_NAME );
+                if (syncMethodName != null) {
+                    insn.put(IJpfTraceConstants.SYNC_METHOD_NAME, syncMethodName);
+                }
+
+                Boolean isMethodReturn = optBoolean(insnObj, IJpfTraceConstants.IS_METHOD_RETURN);
+                if (isMethodReturn != null) {
+                    insn.put(IJpfTraceConstants.IS_METHOD_RETURN, isMethodReturn);
+                }
+
+                String returnedMethodName = optString(insnObj, IJpfTraceConstants.RETURNED_METHOD_NAME );
+                if (returnedMethodName != null) {
+                    insn.put(IJpfTraceConstants.RETURNED_METHOD_NAME, returnedMethodName);
+                }
+
+                Boolean isMethodCall = optBoolean(insnObj, IJpfTraceConstants.IS_METHOD_CALL);
+                if (isMethodCall != null) {
+                    insn.put(IJpfTraceConstants.IS_METHOD_CALL, isMethodCall);
+                }
+
+                String calledMethodName = optString(insnObj, IJpfTraceConstants.CALLED_METHOD_NAME );
+                if (calledMethodName != null) {
+                    insn.put(IJpfTraceConstants.CALLED_METHOD_NAME, calledMethodName);
+                }
+
+                Boolean isThreadRelatedMethod = optBoolean(insnObj, IJpfTraceConstants.IS_THREAD_RELATED_METHOD);
+                if (isThreadRelatedMethod != null) {
+                    insn.put(IJpfTraceConstants.IS_THREAD_RELATED_METHOD, isThreadRelatedMethod);
+                }
+
+                String threadRelatedMethod = optString(insnObj, IJpfTraceConstants.THREAD_RELATED_METHOD );
+                if (threadRelatedMethod != null) {
+                    insn.put(IJpfTraceConstants.THREAD_RELATED_METHOD, threadRelatedMethod);
+                }
+
+                Boolean isFieldAccess = optBoolean(insnObj, IJpfTraceConstants.IS_FIELD_ACCESS);
+                if (isFieldAccess != null) {
+                    insn.put(IJpfTraceConstants.IS_FIELD_ACCESS, isFieldAccess);
+                }
+
+                String accessedField = optString(insnObj, IJpfTraceConstants.ACCESSED_FIELD );
+                if (accessedField != null) {
+                    insn.put(IJpfTraceConstants.ACCESSED_FIELD, accessedField);
+                }
+                
                 insns.add(insn);
             }
         }
@@ -221,16 +280,21 @@ public class JpfTraceField {
         fieldsMap.put(IJpfTraceConstants.TRANSITION_ID, transitionId);
         fieldsMap.put(IJpfTraceConstants.THREAD_ID, threadId);
         fieldsMap.put(IJpfTraceConstants.THREAD_NAME, threadName);
-        fieldsMap.put(IJpfTraceConstants.THREAD_STATE, threadState);
+        if (threadState != null)
+            fieldsMap.put(IJpfTraceConstants.THREAD_STATE, threadState);
+        if (threadEntryMethod != null)
+            fieldsMap.put(IJpfTraceConstants.THREAD_ENTRY_METHOD, threadEntryMethod);
 
         fieldsMap.put(IJpfTraceConstants.CHOICE_ID, choiceId);
+        if (currentChoice != null)
+            fieldsMap.put(IJpfTraceConstants.CURRENT_CHOICE, currentChoice);
         
-        if (choiceId != null && choiceId.equals("START")) {
+        if (choiceId != null && (choiceId.equals("START") || choiceId.equals("JOIN"))) {
             fieldsMap.put(IJpfTraceConstants.TYPE, "THREAD_START");
             String comm = optString(root, IJpfTraceConstants.COMM);
             fieldsMap.put(IJpfTraceConstants.COMM, comm);
-            Integer pid = optInt(root, IJpfTraceConstants.PID);
-            fieldsMap.put(IJpfTraceConstants.PID, pid);
+            Integer tid = optInt(root, IJpfTraceConstants.TID);
+            fieldsMap.put(IJpfTraceConstants.TID, tid);
             fieldsMap.put(IJpfTraceConstants.PRIO, 100);
             fieldsMap.put(IJpfTraceConstants.SUCCESS, 1);
             fieldsMap.put(IJpfTraceConstants.TARGET_CPU, 0);
