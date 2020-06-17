@@ -18,6 +18,8 @@ public interface IJpfTraceConstants {
 
     String TRANSITIONS = "transitions";
 
+    String CHOICE_INFO = "choiceInfo";
+
     String CHOICE_ID = "choiceId"; 
 
     String NUM_CHOICES = "numChoices";
@@ -96,5 +98,11 @@ public interface IJpfTraceConstants {
 
     String DURATION = "duration";
 
-    String THREAD_SWITCH = "switchThread";
+    String THREAD_SWITCH = "threadSwitch";
+
+    String THREAD_AWAKE = "threadAwake";
+
+    String SRC = "src";
+
+    String NO_SRC = "noSrc";
 }

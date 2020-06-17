@@ -15,8 +15,10 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
     private static final @NonNull String PREV_STATE = "prevState";
     // private static final @NonNull String CHILD_TID = "child_pid"; //$NON-NLS-1$
     private static final @NonNull String CPU_FREQUENCY = "cpu_frequency"; //$NON-NLS-1$
-    private static final @NonNull String THREAD_SWITCH = "THREAD_SWITCH";
-    private static final @NonNull String THREAD_START = "THREAD_START";
+
+    // event types 
+    private static final @NonNull String THREAD_SWITCH = "ThreadSwitch";
+    private static final @NonNull String THREAD_START = "ThreadAwake";
     private static final @NonNull String LOCK = "LOCK";
     private static final @NonNull String EXPOSE = "EXPOSE";
     private static @Nullable JpfTraceEventLayout INSTANCE;

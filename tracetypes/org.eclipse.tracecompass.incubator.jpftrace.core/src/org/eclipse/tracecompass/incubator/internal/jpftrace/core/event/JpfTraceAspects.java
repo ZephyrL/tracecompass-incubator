@@ -7,7 +7,7 @@ package org.eclipse.tracecompass.incubator.internal.jpftrace.core.event;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+// import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfBaseAspects;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
@@ -22,38 +22,38 @@ public class JpfTraceAspects {
         Iterable<@NonNull ITmfEventAspect<?>> aspectSet = aspects;
         if (aspectSet == null) {
             aspectSet = ImmutableList.of(
-                    new JpfTraceLabelAspect(),
+                    // new JpfTraceLabelAspect(),                    
+                    new JpfTraceCpuAspect(),
                     TmfBaseAspects.getTimestampAspect(),
                     TmfBaseAspects.getEventTypeAspect(),
-                    TmfBaseAspects.getContentsAspect(),
-                    new JpfTraceCpuAspect(),
-                    new JpfTraceThreadStateAspect(),
                     new JpfTraceThreadNameAspect(),
+                    new JpfTraceThreadStateAspect(),
                     new JpfTraceChoiceAspect(),
-                    new JpfTraceSourceAspect()
+                    new JpfTraceSourceAspect(),
+                    TmfBaseAspects.getContentsAspect()
                     );
             aspects = aspectSet;
         }
         return aspectSet;
     }
 
-    private static class JpfTraceLabelAspect implements IJpfTraceAspect<String> {
+    // private static class JpfTraceLabelAspect implements IJpfTraceAspect<String> {
 
-        @Override
-        public @NonNull String getName() {
-            return String.valueOf(Messages.JpfTraceAspects_Name);
-        }
+    //     @Override
+    //     public @NonNull String getName() {
+    //         return String.valueOf(Messages.JpfTraceAspects_Name);
+    //     }
 
-        @Override
-        public @NonNull String getHelpText() {
-            return String.valueOf(Messages.JpfTraceAspects_NameD);
-        }
+    //     @Override
+    //     public @NonNull String getHelpText() {
+    //         return String.valueOf(Messages.JpfTraceAspects_NameD);
+    //     }
 
-        @Override
-        public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            return event.getName();
-        }
-    }
+    //     @Override
+    //     public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
+    //         return event.getName();
+    //     }
+    // }
 
     private static class JpfTraceThreadStateAspect implements IJpfTraceAspect<String> {
         
@@ -69,7 +69,7 @@ public class JpfTraceAspects {
 
         @Override 
         public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            return event.getThreadState();
+            return event.getField().getThreadState();
         }
     }
 
@@ -87,7 +87,7 @@ public class JpfTraceAspects {
 
         @Override
         public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            return event.getThreadName();
+            return event.getField().getThreadName();
         }
     }
     
@@ -109,7 +109,7 @@ public class JpfTraceAspects {
         }
     }
 
-    private static class JpfTraceSourceAspect implements IJpfTraceAspect<ITmfEventField> {
+    private static class JpfTraceSourceAspect implements IJpfTraceAspect<String> {
         @Override
         public @NonNull String getName() {
             return String.valueOf(Messages.JpfTraceAspects_Source);
@@ -121,8 +121,8 @@ public class JpfTraceAspects {
         }
 
         @Override 
-        public ITmfEventField resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            return event.getField().getSources();
+        public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
+            return event.getField().getSource();
         }
     }
 

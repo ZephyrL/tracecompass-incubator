@@ -21,10 +21,9 @@ public class JpfTraceEvent extends TmfEvent {
      *            the event field, contains all the needed data
      */
     public JpfTraceEvent(ITmfTrace trace, long rank, JpfTraceField field) {
-        super(trace, rank, trace.createTimestamp(field.getTimestamp()), JpfTraceEventTypeFactory.get(field.getName()), field.getContent()); //$NON-NLS-1$
-        // super(trace, rank, trace.createTimestamp(field.getTimestamp()), JpfTraceEventTypeFactory.get("sched_switch"), field.getContent()); //$NON-NLS-1$
+        super(trace, rank, trace.createTimestamp(field.getTimestamp()), JpfTraceEventTypeFactory.get(field.getType()), field.getContent()); //$NON-NLS-1$
         fField = field;
-        fName = field.getName();
+        fName = field.getType();
     }
 
     @Override
@@ -44,14 +43,6 @@ public class JpfTraceEvent extends TmfEvent {
      */
     public JpfTraceField getField() {
         return fField;
-    }
-
-    public String getThreadState() {
-        return fField.getThreadState();
-    }
-
-    public String getThreadName() {
-        return fField.getThreadName();
     }
 
 }

@@ -46,12 +46,14 @@ import com.google.gson.stream.JsonReader;
 public class JpfTrace extends JsonTrace implements IKernelTrace {
 
     private final @NonNull Iterable<@NonNull ITmfEventAspect<?>> fEventAspects;
+    private static Integer fReaderScope;
 
     /**
      * Constructor
      */
     public JpfTrace() {
         fEventAspects = Lists.newArrayList(JpfTraceAspects.getAspects());
+        fReaderScope = -1;
     }
 
     private static final void Log(String s){
@@ -167,7 +169,7 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
     }
 
     private static void goToCorrectStart(RandomAccessFile rafile) throws IOException {
-        // skip start if it's {"traceEvents":
+        
         String startKey = "\"transitions\""; //$NON-NLS-1$
 
         StringBuilder sb = new StringBuilder();
@@ -191,14 +193,17 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
             val = rafile.read();
         }
 
-
+        // For JPF traces, the first colon should have the KEY "transitions" on its left
         if (!(sb.toString().startsWith('{' + startKey) && rafile.length() > 30)) {
             rafile.seek(0);
         }
 
-        Log("JPF::goToCorrectStart: " + sb.toString());
-        Log("JPF::goToCorrectStart: " + String.valueOf(rafile.getFilePointer()));
+        // reset the scope counter to -1
+        resetGlobalReaderScope();
+    }
 
+    private static void resetGlobalReaderScope() {
+        fReaderScope = -1;
     }
 
     @Override
@@ -206,9 +211,51 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
         return fEventAspects;
     }
 
+    // override function for finding next JPF event
+    public static @Nullable String readNextEventString(IReaderWrapper parser) throws IOException {
+
+        // there are three cases, 
+        // 1. the next event locates right after the braces {} of this one, 
+        // 2. the next event locates in the same transition, but another brace {}
+        // 3. the next event locates in the next transition
+
+        // simply: only strings inside braces with scope = 1 will be recorded as event
+
+        // Log("readNextEventString: " + String.valueOf(fReaderScope));
+
+        StringBuilder sb = new StringBuilder();
+
+        int elem = parser.read();
+        boolean inQuotes = false; 
+
+        while (elem != -1) {
+            if (elem == '"') {
+                inQuotes = !inQuotes;
+            } else {
+                if (inQuotes) {
+                    // do nothing, continue to read
+                } else if (elem == '{') {
+                    fReaderScope++;
+                } else if (elem == '}') {
+                    fReaderScope--;
+                    if (fReaderScope == 0) {
+                        sb.append((char) elem);
+                        // Log("readNextEventString::" + sb.toString());
+                        return sb.toString();
+                    }
+                }
+            }
+            if (fReaderScope >= 1) {
+                sb.append((char) elem);
+            }
+            elem = parser.read();
+        }
+        return null;
+    }
+
     @Override
     public ITmfEvent parseEvent(ITmfContext context) {
-        Log("JpfTrace::parseEvent: called");
+        // Log("JpfTrace::parseEvent: called");
         @Nullable
         ITmfLocation location = context.getLocation();
         if (location instanceof TmfLongLocation) {
@@ -221,9 +268,12 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
                 if (!locationInfo.equals(fFileInput.getFilePointer())) {
                     fFileInput.seek(locationInfo);
                 }
+                if (locationInfo < 10) {
+                    resetGlobalReaderScope();
+                }
                 String nextJson = readNextEventString(() -> fFileInput.read());
                 if (nextJson != null) {
-                    // String process = fProcesses.get(JpfTraceField.getProcess(nextJson));
+
                     JpfTraceField field = JpfTraceField.parseJson(nextJson);
                     if (field == null) {
                         return null;

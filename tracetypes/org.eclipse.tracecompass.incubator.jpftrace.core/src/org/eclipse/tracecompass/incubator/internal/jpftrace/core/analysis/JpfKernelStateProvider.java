@@ -103,6 +103,8 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
     private final KernelEventHandler fSysEntryHandler;
     private final KernelEventHandler fSysExitHandler;
 
+    // private final JpfDefaultEventHandler fJpfDefaultEventHandler;
+
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
@@ -211,6 +213,9 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
                 }
             }
             if (handler != null) {
+                if (handler instanceof SchedSwitchHandler || handler instanceof SchedWakeupHandler) {
+                    System.out.println("JpfKernelStateProvider::Recognized as thread related event");
+                }
                 handler.handleEvent(ss, event);
             }
 
