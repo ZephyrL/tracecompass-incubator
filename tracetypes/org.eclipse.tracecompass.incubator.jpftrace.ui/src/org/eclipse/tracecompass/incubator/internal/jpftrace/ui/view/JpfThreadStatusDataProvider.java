@@ -159,27 +159,19 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     @Override
     public @NonNull TmfModelResponse<@NonNull TmfTreeModel<@NonNull TimeGraphEntryModel>> fetchTree(@NonNull Map<@NonNull String, @NonNull Object> fetchParameters, @Nullable IProgressMonitor monitor) {
-        System.out.println("fetchTree:: called");
         if (fLastEnd == Long.MAX_VALUE) {
-            System.out.println("fetchTree:: tree already created");
             return new TmfModelResponse<>(new TmfTreeModel<>(Collections.emptyList(), filter(Objects.requireNonNull(fTraceEntry), fTidToEntry, fetchParameters)), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
         }
 
-        System.out.println("fetchTree:: waitForInitialization");
         fModule.waitForInitialization();
         ITmfStateSystem ss = fModule.getStateSystem();
         if (ss == null) {
-            System.out.println("fetchTree:: get state system failed");
             return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
         }
-        System.out.println("fetchTree:: initialized");
         synchronized (fBuildMap) {
             boolean complete = ss.waitUntilBuilt(0);
-            System.out.println("fetchTree:: state system complete " + String.valueOf(complete));
             @NonNull List<@NonNull TimeGraphEntryModel> list = Collections.emptyList();
 
-            System.out.println("fetchTree:: before update list " + String.valueOf(ss.getNbAttributes()));
-            System.out.println("fetchTree:: " + String.valueOf(ss.getStartTime()));
             if (ss.getNbAttributes() > 0 && ss.getStartTime() != Long.MIN_VALUE) {
                 long end = ss.getCurrentEndTime();
                 fLastEnd = Long.max(fLastEnd, ss.getStartTime());
@@ -192,7 +184,6 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
                 quarks.addAll(ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.PPID));
                 quarks.addAll(ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.PID));
                 try {
-                    System.out.println("fetchTree:: query2D time and PID");
                     for (ITmfStateInterval interval : ss.query2D(quarks, Long.min(fLastEnd, end), end)) {
                         if (monitor != null && monitor.isCanceled()) {
                             return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);

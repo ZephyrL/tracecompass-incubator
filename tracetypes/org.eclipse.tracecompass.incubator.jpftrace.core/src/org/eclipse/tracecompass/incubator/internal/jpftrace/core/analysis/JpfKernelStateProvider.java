@@ -49,6 +49,9 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadInfoHandler;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ChoiceInfoHandler;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.InstructionHandler;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadLockHandler;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadExposeHandler;
 
@@ -76,7 +79,12 @@ import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handle
  * |  |  |- SYSTEM_CALL
  * |  |  |- CURRENT_CPU_RQ
  * |  |  |- PID -> The process ID. If absent, the thread is a process
- * |  |  |- LOCK/EXPOSE -> Timestamp of these events
+ * |  |  |- ENTRY_METHOD -> the caller method of current thread
+ * |  |  |- CHOICE -> the current choice
+ * |  |  |- CHOICE_ID -> the choice name (id)
+ * |  |  |- CHOICE_MADE -> name of the choice  (in the format : "[i]/[n]")
+ * |  |  |- SOURCE -> source code of instruction on current thread
+ * |  |  |- SPEC -> type of the current instruction, is it interested? (lock/sync/fieldaccess)
  * </pre>
  *
  * @author Alexandre Montplaisir
@@ -153,6 +161,9 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
             builder.put(jpfLayout.eventSchedProcessWaking(), new SchedWakeupHandler(layout));
             builder.put(jpfLayout.eventSchedMigrateTask(), new SchedMigrateTaskHandler(layout));
             builder.put(jpfLayout.eventCpuFrequency(), new CpuFrequencyHandler(layout));
+            builder.put(jpfLayout.eventThreadInfo(), new ThreadInfoHandler(layout));
+            builder.put(jpfLayout.eventChoiceInfo(), new ChoiceInfoHandler(layout));
+            builder.put(jpfLayout.eventInstruction(), new InstructionHandler(layout));
             builder.put(jpfLayout.eventThreadLock(), new ThreadLockHandler(layout));
             builder.put(jpfLayout.eventThreadExpose(), new ThreadExposeHandler(layout));
         }

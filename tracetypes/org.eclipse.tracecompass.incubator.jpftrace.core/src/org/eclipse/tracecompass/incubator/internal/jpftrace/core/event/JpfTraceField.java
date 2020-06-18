@@ -14,6 +14,7 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 // import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.LinuxValues;
+// import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
 // import com.google.common.collect.ImmutableMap;
 
 import com.google.gson.Gson;
@@ -108,7 +109,7 @@ public class JpfTraceField {
      * @return an event field
      */
     public static @Nullable JpfTraceField parseJson(String fieldsString) {
-        // Log("JpfTraceField::parseJson");
+        // Log("JpfTraceField::parseJson " + fieldsString);
 
         @Nullable
         JsonObject root = G_SON.fromJson(fieldsString, JsonObject.class);
@@ -131,7 +132,7 @@ public class JpfTraceField {
                 sThreadName = threadName;
             }
             // TODO: return JpfTraceField
-            fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadEntry");
+            fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadInfo");
 
             fieldsMap.put(IJpfTraceConstants.THREAD_ID, threadId);
             fieldsMap.put(IJpfTraceConstants.THREAD_NAME, threadName);
@@ -155,7 +156,7 @@ public class JpfTraceField {
             }
 
             // TODO: return JpfTraceField            
-            fieldsMap.put(IJpfTraceConstants.TYPE, "Choice");
+            fieldsMap.put(IJpfTraceConstants.TYPE, "ChoiceInfo");
             fieldsMap.put(IJpfTraceConstants.THREAD_ID, sThreadId);
             fieldsMap.put(IJpfTraceConstants.THREAD_NAME, sThreadName);
 
@@ -265,7 +266,7 @@ public class JpfTraceField {
             return new JpfTraceField(fieldsMap);
         }
 
-        Log("Not recognized as a trace event: " + fieldsString);
+        Log("Not recognized as a JPF Trace Event: " + fieldsString);
         return null;
     }
 
@@ -331,7 +332,7 @@ public class JpfTraceField {
         return (src != null) ? src : "" ;
     }
 
-    public int getNumberOfChoices() {
-        return fChoices.size();
+    public ArrayList<String> getChoices() {
+        return fChoices;
     }
 }

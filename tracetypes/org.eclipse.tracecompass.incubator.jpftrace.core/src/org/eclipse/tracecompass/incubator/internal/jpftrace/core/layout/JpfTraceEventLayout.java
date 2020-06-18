@@ -19,6 +19,10 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
     // event types 
     private static final @NonNull String THREAD_SWITCH = "ThreadSwitch";
     private static final @NonNull String THREAD_START = "ThreadAwake";
+    private static final @NonNull String THREAD_INFO = "ThreadInfo";
+    private static final @NonNull String CHOICE_INFO = "ChoiceInfo";
+    private static final @NonNull String INSTRUCTION = "Instruction";
+
     private static final @NonNull String LOCK = "LOCK";
     private static final @NonNull String EXPOSE = "EXPOSE";
     private static @Nullable JpfTraceEventLayout INSTANCE;
@@ -72,11 +76,6 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
         return PREV_STATE;
     }
 
-    // @Override
-    // public String fieldChildTid() {
-    //     return CHILD_TID;
-    // }
-
     @Override
     public @NonNull String eventCpuFrequency() {
         return CPU_FREQUENCY;
@@ -96,7 +95,20 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
     public @NonNull String eventSchedProcessWaking() {
         return THREAD_START;
     }
+    
+    public @NonNull String eventThreadInfo() {
+        return THREAD_INFO;
+    }
 
+    public @NonNull String eventChoiceInfo() {
+        return CHOICE_INFO;
+    }
+
+    public @NonNull String eventInstruction() {
+        return INSTRUCTION;
+    }
+
+    // TODO: remove following
     public @NonNull String eventThreadLock() {
         return LOCK;
     }

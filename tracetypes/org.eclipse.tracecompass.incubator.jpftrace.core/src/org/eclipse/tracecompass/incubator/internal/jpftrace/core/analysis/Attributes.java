@@ -3,6 +3,36 @@ package org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
+/**
+ * Attribute tree:
+ *
+ * <pre>
+ * |- CPUs
+ * |  |- <CPU number> -> CPU Status
+ * |  |  |- CURRENT_THREAD
+ * |  |  |- SOFT_IRQS
+ * |  |  |  |- <Soft IRQ number> -> Soft IRQ Status
+ * |  |  |- IRQS
+ * |  |  |  |- <IRQ number> -> IRQ Status
+ * |- IRQs / SOFT_IRQs
+ * |  |- <IRQ number> -> Aggregate Status
+ * |- THREADS
+ * |  |- <Thread number> -> Thread Status
+ * |  |  |- PPID -> The thread ID of the parent, can be a process or a thread
+ * |  |  |- EXEC_NAME
+ * |  |  |- PRIO
+ * |  |  |- SYSTEM_CALL
+ * |  |  |- CURRENT_CPU_RQ
+ * |  |  |- PID -> The process ID. If absent, the thread is a process
+ * |  |  |- ENTRY_METHOD -> the caller method of current thread
+ * |  |  |- CHOICE -> the current choice
+ * |  |  |- CHOICE_ID -> the choice name (id)
+ * |  |  |- CHOICE_MADE -> name of the choice  (in the format : "[i]/[n]")
+ * |  |  |- SOURCE -> source code of instruction on current thread
+ * |  |  |- SPEC -> type of the current instruction, is it interested? (lock/sync/fieldaccess)
+ * </pre>
+ */
+
 @SuppressWarnings({ "nls", "javadoc" })
 public interface Attributes {
 
@@ -33,6 +63,13 @@ public interface Attributes {
     String THREAD_0_SEPARATOR = "_";
 
     /* Defined Jpf Thread States */
+    String ENTRY_METHOD = "Thread_entry_method";
+    String CHOICE = "Choice_name";
+    String CHOICE_ID = "Choice_id";
+    String CHOICE_MADE = "Choice_made";
+    String SOURCE = "Source";
+    String SPEC = "Special_instruction";
+
     String EXPOSE = "Expose";
     String LOCK = "Lock";
 

@@ -31,6 +31,7 @@ import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
@@ -269,15 +270,17 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
                     fFileInput.seek(locationInfo);
                 }
                 if (locationInfo < 10) {
-                    resetGlobalReaderScope();
+                    Log("parseEvent: reset location");
+                    goToCorrectStart(fFileInput);
                 }
                 String nextJson = readNextEventString(() -> fFileInput.read());
                 if (nextJson != null) {
-
+                    Log("current location: " + String.valueOf(getCurrentLocation()));
                     JpfTraceField field = JpfTraceField.parseJson(nextJson);
                     if (field == null) {
                         return null;
                     }
+                    Log("context rank: " + String.valueOf(context.getRank()));
                     return new JpfTraceEvent(this, context.getRank(), field);
                 }
             } catch (IOException e) {
@@ -303,13 +306,63 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
         }
         if (context.hasValidRank()) {
             long rank = context.getRank();
+            Log("updateAttributes: has valid rank: " + String.valueOf(rank));
             if (getNbEvents() <= rank) {
                 setNbEvents(rank + 1);
             }
             if (getIndexer() != null) {
+                Log("updateAttributes: has valid indexer");
                 getIndexer().updateIndex(context, timestamp);
             }
         }
+    }
+
+
+    @Override
+    public synchronized ITmfContext seekEvent(final ITmfTimestamp timestamp) {
+        // A null timestamp indicates to seek the first event
+        if (timestamp == null) {
+            Log("seekEvent: timestamp is null");
+            ITmfContext context = seekEvent((ITmfLocation) null);
+            context.setRank(0);
+            return context;
+        }
+
+        // Position the trace at the checkpoint
+        // ITmfContext context = fIndexer.seekIndex(timestamp);
+        ITmfContext context = new TmfContext(new TmfLongLocation(0L), 0L);
+
+        // And locate the requested event context
+        ITmfLocation previousLocation = context.getLocation();
+        long previousRank = context.getRank();
+        ITmfEvent event = getNext(context);
+        while (event != null && event.getTimestamp().compareTo(timestamp) < 0) {
+            previousLocation = context.getLocation();
+            previousRank = context.getRank();
+            event = getNext(context);
+        }
+        if (event == null) {
+            context.setLocation(null);
+            context.setRank(ITmfContext.UNKNOWN_RANK);
+        } else {
+            context.dispose();
+            context = seekEvent(previousLocation);
+            context.setRank(previousRank);
+        }
+        return context;
+    }
+
+    @Override
+    public synchronized ITmfEvent getNext(final ITmfContext context) {
+        // parseEvent() does not update the context
+        final ITmfEvent event = parseEvent(context);
+        if (event != null) {
+            updateAttributes(context, event);
+            context.setLocation(getCurrentLocation());
+            context.increaseRank();
+            Log("getNext: " + String.valueOf(context.getRank()));
+        }
+        return event;
     }
 
     @Override
