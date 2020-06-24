@@ -69,7 +69,7 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
 
         String dir = TmfTraceManager.getSupplementaryFileDir(this);
         
-        Log("JpfTrace::initTrace: opening " +  dir + " " + path);
+        // Log("JpfTrace::initTrace: opening " +  dir + " " + path);
         fFile = new File(dir + new File(path).getName());
         if (!fFile.exists()) {
             Job sortJob = new JpfTraceSortingJob(this, path);
@@ -86,17 +86,17 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
             if (!result.isOK()) {
                 throw new TmfTraceException("Job failed " + result.getMessage()); 
             } 
-            Log("JpfTrace::initTrace: Sorting Job Complete");
+            // Log("JpfTrace::initTrace: Sorting Job Complete");
         }
-        Log("JpfTrace::initTrace: try getting timestamp");
+        // Log("JpfTrace::initTrace: try getting timestamp");
         try {
             fFileInput = new BufferedRandomAccessFile(fFile, "r"); 
 
             registerBaseTimestamp(path);
-            Log("JpfTrace::initTrace: baseTimestamp:" + String.valueOf(JpfTraceField.getPseudoTime()));
+            // Log("JpfTrace::initTrace: baseTimestamp:" + String.valueOf(JpfTraceField.getPseudoTime()));
 
             goToCorrectStart(fFileInput);
-            Log("JpfTrace::initTrace complete");
+            // Log("JpfTrace::initTrace complete");
         } catch (IOException e) {
             throw new TmfTraceException(e.getMessage(), e);
         }
@@ -121,7 +121,7 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
 
     @Override
     public IStatus validate(IProject project, String path) {
-        Log("JPF::validate");
+        // Log("JPF::validate");
 
         File file = new File(path);
         if (!file.exists()) {
@@ -270,17 +270,17 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
                     fFileInput.seek(locationInfo);
                 }
                 if (locationInfo < 10) {
-                    Log("parseEvent: reset location");
+                    // Log("parseEvent: reset location: before: " + String.valueOf(locationInfo)); 
                     goToCorrectStart(fFileInput);
                 }
                 String nextJson = readNextEventString(() -> fFileInput.read());
                 if (nextJson != null) {
-                    Log("current location: " + String.valueOf(getCurrentLocation()));
+                    // Log("current location: " + String.valueOf(getCurrentLocation()));
                     JpfTraceField field = JpfTraceField.parseJson(nextJson);
                     if (field == null) {
                         return null;
                     }
-                    Log("context rank: " + String.valueOf(context.getRank()));
+                    // Log("context rank: " + String.valueOf(context.getRank()));
                     return new JpfTraceEvent(this, context.getRank(), field);
                 }
             } catch (IOException e) {
@@ -306,12 +306,12 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
         }
         if (context.hasValidRank()) {
             long rank = context.getRank();
-            Log("updateAttributes: has valid rank: " + String.valueOf(rank));
+            // Log("updateAttributes: has valid rank: " + String.valueOf(rank));
             if (getNbEvents() <= rank) {
                 setNbEvents(rank + 1);
             }
             if (getIndexer() != null) {
-                Log("updateAttributes: has valid indexer");
+                // Log("updateAttributes: has valid indexer");
                 getIndexer().updateIndex(context, timestamp);
             }
         }
@@ -329,6 +329,7 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
         }
 
         // Position the trace at the checkpoint
+        // Log("Timestamp: " + String.valueOf(timestamp.getValue()));
         // ITmfContext context = fIndexer.seekIndex(timestamp);
         ITmfContext context = new TmfContext(new TmfLongLocation(0L), 0L);
 
@@ -336,10 +337,21 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
         ITmfLocation previousLocation = context.getLocation();
         long previousRank = context.getRank();
         ITmfEvent event = getNext(context);
+        // int counter = 0;
+        // Log("Queried Timestamp: " + String.valueOf(timestamp.getValue()));
+        // Log("This Timestamp: " + String.valueOf(event.getTimestamp().getValue()));
         while (event != null && event.getTimestamp().compareTo(timestamp) < 0) {
             previousLocation = context.getLocation();
             previousRank = context.getRank();
             event = getNext(context);
+            // if (event == null) {
+                // Log("Retrieved event is null");
+            // } else {
+                // Log("Query Timestamp: " + String.valueOf(timestamp.getValue()));
+                // Log("This Timestamp: " + String.valueOf(event.getTimestamp().getValue()));
+            // }
+            // Log("Counter: " + String.valueOf(counter++));
+
         }
         if (event == null) {
             context.setLocation(null);
@@ -360,7 +372,7 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
             updateAttributes(context, event);
             context.setLocation(getCurrentLocation());
             context.increaseRank();
-            Log("getNext: " + String.valueOf(context.getRank()));
+            // Log("getNext: " + String.valueOf(context.getRank()));
         }
         return event;
     }

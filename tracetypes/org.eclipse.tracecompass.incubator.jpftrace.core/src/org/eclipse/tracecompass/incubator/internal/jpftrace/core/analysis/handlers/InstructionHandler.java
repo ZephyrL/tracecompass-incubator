@@ -5,7 +5,7 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.handlers.
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.handlers.KernelEventHandlerUtils;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+// import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 
@@ -38,49 +38,84 @@ public class InstructionHandler extends KernelEventHandler {
             return;
         }
 
-        // StringBuilder spec = new StringBuilder();
+        StringBuilder specBuilder = new StringBuilder();
+        StringBuilder detailBuilder = new StringBuilder();
+        boolean isSpec = false;
 
-        // Boolean isSync = content.getFieldValue(Boolean.class, IJpfTraceConstants.IS_SYNCHRONIZED);
-        // if (isSync != null) {
-        //     spec.append(IJpfTraceConstants.IS_SYNCHRONIZED + " | ");
-        // }
+        Boolean isSync = content.getFieldValue(Boolean.class, IJpfTraceConstants.IS_SYNCHRONIZED);
+        if (isSync != null) {
+            specBuilder.append("isSync");
+            String detail = content.getFieldValue(String.class, IJpfTraceConstants.SYNC_METHOD_NAME);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("InstructionHandler::handleEvent: Warning, the insn is SYNC but has no detail");
+            }
+            isSpec = true;
+        }
 
+        Boolean isMethodCall = content.getFieldValue(Boolean.class, IJpfTraceConstants.IS_METHOD_CALL);
+        if (isMethodCall != null) {
+            if (isSpec) {
+                specBuilder.append(" | ");
+                detailBuilder.append(" | ");
+            }
 
+            specBuilder.append("isMethodCall");
+            String detail = content.getFieldValue(String.class, IJpfTraceConstants.CALLED_METHOD_NAME);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("InstructionHandler::handleEvent: Warning, the insn is METHOD CALL but has no detail");
+            }
+            isSpec = true;
+        }
 
-        // String choiceId = content.getFieldValue(String.class, IJpfTraceConstants.CHOICE_ID);
-        // String currentChoice = content.getFieldValue(String.class, IJpfTraceConstants.CURRENT_CHOICE);
-        
-        // ArrayList<String> choiceList = new ArrayList<>();
-        // if (event instanceof JpfTraceEvent) {
-        //     choiceList = ((JpfTraceEvent)event).getField().getChoices();
-        // }
+        Boolean isThreadRelatedMethod = content.getFieldValue(Boolean.class, IJpfTraceConstants.IS_THREAD_RELATED_METHOD);
+        if (isThreadRelatedMethod != null) {
+            if (isSpec) {
+                specBuilder.append(" | ");
+                detailBuilder.append(" | ");
+            }
 
-        // if (choiceId == null || currentChoice == null || choiceList.size() == 0) {
-        //     System.out.println("InstructionHandler::handleEvent: missing choice information");
-        //     return;
-        // }
+            specBuilder.append("isThreadRelatedMethod");
+            String detail = content.getFieldValue(String.class, IJpfTraceConstants.THREAD_RELATED_METHOD);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("InstructionHandler::handleEvent: Warning, the insn is a LOCK/UNLOCK but has no detail");
+            }
+            isSpec = true;
+        }
 
-        // int pos = choiceList.indexOf(currentChoice);
-        // if (pos < 0 || pos >= choiceList.size()) {
-        //     System.out.println("InstructionHandler::handleEvent: no matching choice");
-        //     return;
-        // }
+        Boolean isFieldAccess = content.getFieldValue(Boolean.class, IJpfTraceConstants.IS_FIELD_ACCESS);
+        if (isFieldAccess != null) {
+            if (isSpec) {
+                specBuilder.append(" | ");
+                detailBuilder.append(" | ");
+            }
 
-        // String choiceMadeString = String.valueOf(pos) + "/" + String.valueOf(choiceList.size());
+            specBuilder.append("isFieldAccess");
+            String detail = content.getFieldValue(String.class, IJpfTraceConstants.ACCESSED_FIELD);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("InstructionHandler::handleEvent: Warning, the insn is a FIELD ACCESS but has no detail");
+            }
+            isSpec = true;
+        }
 
-        // long timestamp = KernelEventHandlerUtils.getTimestamp(event);
-        
         String threadAttributeName = Attributes.buildThreadAttributeName(tid, cpu);
         final int threadNode = ss.getQuarkRelativeAndAdd(KernelEventHandlerUtils.getNodeThreads(ss), threadAttributeName);
-        // final int choiceNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.CHOICE);
-        // final int choiceIdNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.CHOICE_ID);
-        // final int choideMadeNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.CHOICE_MADE);
+        final int specNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.SPEC);
+        final int detailNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.DETAIL);
 
-        // ss.modifyAttribute(timestamp, currentChoice, choiceNode);
-        // ss.modifyAttribute(timestamp, choiceId, choiceIdNode);
-        // ss.modifyAttribute(timestamp, choiceMadeString, choideMadeNode);
+        long timestamp = KernelEventHandlerUtils.getTimestamp(event);
 
-        ITmfStateValue value = ss.queryOngoingState(threadNode);
-        System.out.println("InstructionHandler::value " + String.valueOf(value.unboxValue()));
+        ss.modifyAttribute(timestamp, specBuilder.toString(), specNode);
+        ss.modifyAttribute(timestamp, detailBuilder.toString(), detailNode);
+
+        // ITmfStateValue value = ss.queryOngoingState(specNode);
+        // System.out.println("InstructionHandler::value " + String.valueOf(value.unboxValue()));
     }
 }

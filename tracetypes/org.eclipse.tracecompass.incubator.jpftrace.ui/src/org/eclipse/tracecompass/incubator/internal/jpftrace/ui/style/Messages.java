@@ -8,9 +8,13 @@ public class Messages extends NLS {
     
     public static @Nullable String JpfThreadStyle_ProcessGroup = null;
     
-    public static @Nullable String JpfThreadStyle_lock = null;
+    public static @Nullable String JpfThreadStyle_sync = null;
 
-    public static @Nullable String JpfThreadStyle_expose = null;
+    public static @Nullable String JpfThreadStyle_method_call = null;
+
+    public static @Nullable String JpfThreadStyle_lock_unlock = null;
+
+    public static @Nullable String JpfThreadStyle_field_access = null;
 
     static {
         // initialize resource bundle

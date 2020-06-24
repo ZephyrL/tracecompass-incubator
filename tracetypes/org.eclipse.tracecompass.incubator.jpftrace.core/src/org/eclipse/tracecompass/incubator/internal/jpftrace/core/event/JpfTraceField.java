@@ -48,12 +48,12 @@ public class JpfTraceField {
         fThreadId = (Integer) fields.get(IJpfTraceConstants.THREAD_ID);
         fThreadName = (String) fields.get(IJpfTraceConstants.THREAD_NAME);
 
-        fTimestamp = getPseudoTime();
-        Long duration = (Long) fields.get(IJpfTraceConstants.DURATION);
-        if (duration != null) {
-            setPseudoTime(fTimestamp + duration);
+        Integer id = (Integer) fields.get(IJpfTraceConstants.ID);
+        if (id != null) {
+            fTimestamp = getPseudoTime() + sDuration * id;
         } else {
-            Log("Warning, event has no duration");
+            System.out.println("JpfTraceField, warning: event doesn't have an ID");
+            fTimestamp = getPseudoTime();
         }
 
         fChoices = new ArrayList<>();
@@ -70,12 +70,12 @@ public class JpfTraceField {
         fThreadId = (Integer) fields.get(IJpfTraceConstants.THREAD_ID);
         fThreadName = (String) fields.get(IJpfTraceConstants.THREAD_NAME);
 
-        fTimestamp = getPseudoTime();
-        Long duration = (Long) fields.get(IJpfTraceConstants.DURATION);
-        if (duration != null) {
-            setPseudoTime(fTimestamp + duration);
+        Integer id = (Integer) fields.get(IJpfTraceConstants.ID);
+        if (id != null) {
+            fTimestamp = getPseudoTime() + sDuration * id;
         } else {
-            Log("Warning, event has no duration");
+            System.out.println("JpfTraceField, warning: event doesn't have an ID");
+            fTimestamp = getPseudoTime();
         }
 
         fChoices = choices;
@@ -87,9 +87,9 @@ public class JpfTraceField {
         fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, fields, array); 
     }
 
-    private static final void Log(String s){
-        System.out.println(s);
-    }
+    // private static final void Log(String s){
+    //     System.out.println(s);
+    // }
 
     public static void setPseudoTime(long value) {
         pseudoTime = value;
@@ -116,6 +116,11 @@ public class JpfTraceField {
 
         Map<String, Object> fieldsMap = new HashMap<>();
         fieldsMap.put(IJpfTraceConstants.DURATION, sDuration);
+
+        Integer id = optInt(root, IJpfTraceConstants.ID);
+        if (id >= 0) {
+            fieldsMap.put(IJpfTraceConstants.ID, id);
+        }
 
         // if the event is thread info
         if (optString(root, IJpfTraceConstants.THREAD_NAME) != null) {
@@ -266,7 +271,7 @@ public class JpfTraceField {
             return new JpfTraceField(fieldsMap);
         }
 
-        Log("Not recognized as a JPF Trace Event: " + fieldsString);
+        System.out.println("Not recognized as a JPF Trace Event: " + fieldsString);
         return null;
     }
 

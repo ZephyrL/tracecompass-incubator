@@ -52,8 +52,8 @@ import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTrace
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadInfoHandler;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ChoiceInfoHandler;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.InstructionHandler;
-import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadLockHandler;
-import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadExposeHandler;
+// import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadLockHandler;
+// import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handlers.ThreadExposeHandler;
 
 /**
  * This is the state change input plugin for the state system which handles the
@@ -85,6 +85,7 @@ import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handle
  * |  |  |- CHOICE_MADE -> name of the choice  (in the format : "[i]/[n]")
  * |  |  |- SOURCE -> source code of instruction on current thread
  * |  |  |- SPEC -> type of the current instruction, is it interested? (lock/sync/fieldaccess)
+ * |  |  |- DETAIL -> detail of the special instruction
  * </pre>
  *
  * @author Alexandre Montplaisir
@@ -134,7 +135,7 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
         fSysEntryHandler = new SysEntryHandler(fLayout);
         fSysExitHandler = new SysExitHandler(fLayout);
 
-        System.out.println("JpfKernelStateProvider::constructor");
+        // System.out.println("JpfKernelStateProvider::constructor");
     }
 
     // ------------------------------------------------------------------------
@@ -164,8 +165,8 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
             builder.put(jpfLayout.eventThreadInfo(), new ThreadInfoHandler(layout));
             builder.put(jpfLayout.eventChoiceInfo(), new ChoiceInfoHandler(layout));
             builder.put(jpfLayout.eventInstruction(), new InstructionHandler(layout));
-            builder.put(jpfLayout.eventThreadLock(), new ThreadLockHandler(layout));
-            builder.put(jpfLayout.eventThreadExpose(), new ThreadExposeHandler(layout));
+            // builder.put(jpfLayout.eventThreadLock(), new ThreadLockHandler(layout));
+            // builder.put(jpfLayout.eventThreadExpose(), new ThreadExposeHandler(layout));
         }
 
         for (String s : layout.getIPIIrqVectorsEntries()) {
@@ -224,9 +225,9 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
                 }
             }
             if (handler != null) {
-                if (handler instanceof SchedSwitchHandler || handler instanceof SchedWakeupHandler) {
-                    System.out.println("JpfKernelStateProvider::Recognized as thread related event");
-                }
+                // if (handler instanceof SchedSwitchHandler || handler instanceof SchedWakeupHandler) {
+                //     System.out.println("JpfKernelStateProvider::Recognized as thread related event");
+                // }
                 handler.handleEvent(ss, event);
             }
 

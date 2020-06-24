@@ -23,8 +23,6 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
     private static final @NonNull String CHOICE_INFO = "ChoiceInfo";
     private static final @NonNull String INSTRUCTION = "Instruction";
 
-    private static final @NonNull String LOCK = "LOCK";
-    private static final @NonNull String EXPOSE = "EXPOSE";
     private static @Nullable JpfTraceEventLayout INSTANCE;
 
     public static synchronized @NonNull JpfTraceEventLayout getInstance() {
@@ -106,14 +104,5 @@ public class JpfTraceEventLayout extends DefaultEventLayout {
 
     public @NonNull String eventInstruction() {
         return INSTRUCTION;
-    }
-
-    // TODO: remove following
-    public @NonNull String eventThreadLock() {
-        return LOCK;
-    }
-
-    public @NonNull String eventThreadExpose() {
-        return EXPOSE;
     }
 }

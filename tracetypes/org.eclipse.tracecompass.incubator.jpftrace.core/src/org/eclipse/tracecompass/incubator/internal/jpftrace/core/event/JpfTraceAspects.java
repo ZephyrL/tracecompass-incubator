@@ -27,7 +27,7 @@ public class JpfTraceAspects {
                     TmfBaseAspects.getTimestampAspect(),
                     TmfBaseAspects.getEventTypeAspect(),
                     new JpfTraceThreadNameAspect(),
-                    new JpfTraceThreadStateAspect(),
+                    // new JpfTraceThreadStateAspect(),
                     new JpfTraceChoiceAspect(),
                     new JpfTraceSourceAspect(),
                     TmfBaseAspects.getContentsAspect()
@@ -55,23 +55,23 @@ public class JpfTraceAspects {
     //     }
     // }
 
-    private static class JpfTraceThreadStateAspect implements IJpfTraceAspect<String> {
+    // private static class JpfTraceThreadStateAspect implements IJpfTraceAspect<String> {
         
-        @Override
-        public @NonNull String getName() {
-            return String.valueOf(Messages.JpfTraceAspects_ThreadState);
-        }
+    //     @Override
+    //     public @NonNull String getName() {
+    //         return String.valueOf(Messages.JpfTraceAspects_ThreadState);
+    //     }
 
-        @Override
-        public @NonNull String getHelpText() {
-            return String.valueOf(Messages.JpfTraceAspects_ThreadStateD);
-        }
+    //     @Override
+    //     public @NonNull String getHelpText() {
+    //         return String.valueOf(Messages.JpfTraceAspects_ThreadStateD);
+    //     }
 
-        @Override 
-        public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
-            return event.getField().getThreadState();
-        }
-    }
+    //     @Override 
+    //     public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
+    //         return event.getField().getThreadState();
+    //     }
+    // }
 
     private static class JpfTraceThreadNameAspect implements IJpfTraceAspect<String> {
 

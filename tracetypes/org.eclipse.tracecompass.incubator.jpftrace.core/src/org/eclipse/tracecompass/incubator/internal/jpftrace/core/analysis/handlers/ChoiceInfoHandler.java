@@ -5,7 +5,7 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.handlers.
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.handlers.KernelEventHandlerUtils;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+// import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 
@@ -51,7 +51,7 @@ public class ChoiceInfoHandler extends KernelEventHandler {
             return;
         }
 
-        String choiceMadeString = String.valueOf(pos) + "/" + String.valueOf(choiceList.size());
+        String choiceMadeString = String.valueOf(pos + 1) + "/" + String.valueOf(choiceList.size());
 
         long timestamp = KernelEventHandlerUtils.getTimestamp(event);
         
@@ -65,7 +65,7 @@ public class ChoiceInfoHandler extends KernelEventHandler {
         ss.modifyAttribute(timestamp, choiceId, choiceIdNode);
         ss.modifyAttribute(timestamp, choiceMadeString, choideMadeNode);
 
-        ITmfStateValue value = ss.queryOngoingState(choideMadeNode);
-        System.out.println("ChoiceInfoHandler::value " + String.valueOf(value.unboxValue()));
+        // ITmfStateValue value = ss.queryOngoingState(choideMadeNode);
+        // System.out.println("ChoiceInfoHandler::value " + String.valueOf(value.unboxValue()));
     }
 }

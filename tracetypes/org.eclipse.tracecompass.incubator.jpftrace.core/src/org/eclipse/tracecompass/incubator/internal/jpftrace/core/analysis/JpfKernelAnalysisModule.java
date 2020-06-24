@@ -54,7 +54,7 @@ public class JpfKernelAnalysisModule extends TmfStateSystemAnalysisModule {
             layout = DefaultEventLayout.getInstance();
         }
 
-        System.out.println("JpfKernelAnalysisModule::createStateProvider: instantiating KernelStateProvider");
+        // System.out.println("JpfKernelAnalysisModule::createStateProvider: instantiating KernelStateProvider");
 
         return new JpfKernelStateProvider(trace, layout);
     }

@@ -9,9 +9,13 @@ import com.google.common.collect.ImmutableMap;
 
 public enum JpfThreadStyle {
 
-    LOCK(String.valueOf(Messages.JpfThreadStyle_lock), 0, 100, 200, 255, 0.25f, StyleProperties.SymbolType.DIAMOND),
+    SYNC(String.valueOf(Messages.JpfThreadStyle_sync), 0, 100, 200, 255, 0.25f, StyleProperties.SymbolType.DIAMOND),
 
-    EXPOSE(String.valueOf(Messages.JpfThreadStyle_expose), 255, 0, 100, 255, 0.25f, StyleProperties.SymbolType.CIRCLE);
+    METHOD_CALL(String.valueOf(Messages.JpfThreadStyle_method_call), 200, 40, 100, 255, 0.30f, StyleProperties.SymbolType.INVERTED_TRIANGLE),
+
+    LOCK_UNLOCK(String.valueOf(Messages.JpfThreadStyle_lock_unlock), 255, 200, 100, 255, 0.25f, StyleProperties.SymbolType.CROSS),
+
+    FIELD_ACCESS(String.valueOf(Messages.JpfThreadStyle_field_access), 100, 255, 200, 255, 0.35f, StyleProperties.SymbolType.CIRCLE);
 
     private final Map<String, Object> fMap;
     
@@ -32,11 +36,21 @@ public enum JpfThreadStyle {
         if (heightFactor > 1.0 || heightFactor < 0) {
             throw new IllegalArgumentException("Height factor needs to be between 0 and 1.0, given hint : " + heightFactor); //$NON-NLS-1$
         }
-        fMap = ImmutableMap.of(StyleProperties.STYLE_NAME, label,
-                StyleProperties.BACKGROUND_COLOR, X11ColorUtils.toHexColor(red, green, blue),
-                StyleProperties.HEIGHT, heightFactor,
-                StyleProperties.OPACITY, (float) alpha / 255,
-                StyleProperties.SYMBOL_TYPE, symbolType);
+        // fMap = ImmutableMap.of(StyleProperties.STYLE_NAME, label,
+        //         StyleProperties.COLOR, X11ColorUtils.toHexColor(red, green, blue),
+        //         StyleProperties.HEIGHT, heightFactor,
+        //         StyleProperties.OPACITY, (float) alpha / 255,
+        //         StyleProperties.SYMBOL_TYPE, symbolType);
+
+        ImmutableMap.Builder<String, Object> builder = new ImmutableMap.Builder<>();
+        builder.put(StyleProperties.STYLE_NAME, label);
+        builder.put(StyleProperties.COLOR, X11ColorUtils.toHexColor(red, green, blue));
+        builder.put(StyleProperties.BACKGROUND_COLOR, X11ColorUtils.toHexColor(red, green, blue));
+        builder.put(StyleProperties.HEIGHT, heightFactor);
+        builder.put(StyleProperties.OPACITY, (float) alpha / 255);
+        builder.put(StyleProperties.SYMBOL_TYPE, symbolType);
+        
+        fMap = builder.build();
     }
 
     public String getLabel() {

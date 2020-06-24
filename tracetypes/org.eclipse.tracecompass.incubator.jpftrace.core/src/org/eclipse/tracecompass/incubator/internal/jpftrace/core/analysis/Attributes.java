@@ -30,6 +30,7 @@ import org.eclipse.tracecompass.tmf.core.util.Pair;
  * |  |  |- CHOICE_MADE -> name of the choice  (in the format : "[i]/[n]")
  * |  |  |- SOURCE -> source code of instruction on current thread
  * |  |  |- SPEC -> type of the current instruction, is it interested? (lock/sync/fieldaccess)
+ * |  |  |- DETAIL -> detail of the special instruction
  * </pre>
  */
 
@@ -69,6 +70,7 @@ public interface Attributes {
     String CHOICE_MADE = "Choice_made";
     String SOURCE = "Source";
     String SPEC = "Special_instruction";
+    String DETAIL = "Instruction_detail";
 
     String EXPOSE = "Expose";
     String LOCK = "Lock";

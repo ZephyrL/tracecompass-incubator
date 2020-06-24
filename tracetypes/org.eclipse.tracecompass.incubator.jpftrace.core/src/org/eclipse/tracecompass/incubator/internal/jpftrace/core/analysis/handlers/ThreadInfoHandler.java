@@ -5,7 +5,7 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.handlers.
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernel.handlers.KernelEventHandlerUtils;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
-import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+// import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 
@@ -43,7 +43,7 @@ public class ThreadInfoHandler extends KernelEventHandler {
 
         ss.modifyAttribute(timestamp, threadEntryMethod, threadEntryMethodNode);
 
-        ITmfStateValue value = ss.queryOngoingState(threadEntryMethodNode);
-        System.out.println("ThreadInfoHandler::value " + String.valueOf(value.unboxValue()));
+        // ITmfStateValue value = ss.queryOngoingState(choideMadeNode);
+        // System.out.println("ChoiceInfoHandler::value " + String.valueOf(value.unboxValue()));
     }
 }

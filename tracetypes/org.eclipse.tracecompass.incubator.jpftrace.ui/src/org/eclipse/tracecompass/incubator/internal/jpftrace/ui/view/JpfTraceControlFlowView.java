@@ -13,7 +13,7 @@ public class JpfTraceControlFlowView extends ControlFlowView {
 
     @Override
     protected String getProviderId() {
-        System.out.println("JpfTraceControlFlowView::getProviderId: called");
+        // System.out.println("JpfTraceControlFlowView::getProviderId: called");
         return JpfThreadStatusDataProvider.ID;
     }
 }

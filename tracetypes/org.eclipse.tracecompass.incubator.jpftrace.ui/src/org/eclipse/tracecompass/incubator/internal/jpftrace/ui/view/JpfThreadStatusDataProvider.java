@@ -100,12 +100,14 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     private static final AtomicLong fAtomicLong = new AtomicLong();
 
-    private static final @NonNull Map<@NonNull String, @NonNull OutputElementStyle> STATE_MAP;
+    private static final @NonNull Map<@NonNull String, @NonNull OutputElementStyle> STYLE_MAP;
     private static final int LINK_VALUE = 8;
-    private static final int LOCK_VALUE = 9;
-    private static final int EXPOSE_VALUE = 10;
+    private static final int SYNC_VALUE = 9;
+    private static final int METHOD_CALL_VALUE = 10;
+    private static final int LOCK_UNLOCK_VALUE = 11;
+    private static final int FIELD_ACCESS_VALUE = 12;
 
-    private static final @NonNull Map<@NonNull String, @NonNull OutputElementStyle> STYLE_MAP = Collections.synchronizedMap(new HashMap<>());
+    // private static final @NonNull Map<@NonNull String, @NonNull OutputElementStyle> STYLE_MAP = Collections.synchronizedMap(new HashMap<>());
 
     static {
         ImmutableMap.Builder<@NonNull String, @NonNull OutputElementStyle> builder = new ImmutableMap.Builder<>();
@@ -118,9 +120,11 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
         builder.put(LinuxStyle.WAIT_FOR_CPU.getLabel(), new OutputElementStyle(null, LinuxStyle.WAIT_FOR_CPU.toMap()));
         builder.put(LinuxStyle.WAIT_UNKNOWN.getLabel(), new OutputElementStyle(null, LinuxStyle.WAIT_UNKNOWN.toMap()));
         builder.put(LinuxStyle.LINK.getLabel(), new OutputElementStyle(null, LinuxStyle.LINK.toMap()));
-        builder.put(JpfThreadStyle.LOCK.getLabel(), new OutputElementStyle(null, JpfThreadStyle.LOCK.toMap()));
-        builder.put(JpfThreadStyle.EXPOSE.getLabel(), new OutputElementStyle(null, JpfThreadStyle.EXPOSE.toMap()));
-        STATE_MAP = builder.build();
+        builder.put(JpfThreadStyle.SYNC.getLabel(), new OutputElementStyle(null, JpfThreadStyle.SYNC.toMap()));
+        builder.put(JpfThreadStyle.METHOD_CALL.getLabel(), new OutputElementStyle(null, JpfThreadStyle.METHOD_CALL.toMap()));
+        builder.put(JpfThreadStyle.LOCK_UNLOCK.getLabel(), new OutputElementStyle(null, JpfThreadStyle.LOCK_UNLOCK.toMap()));
+        builder.put(JpfThreadStyle.FIELD_ACCESS.getLabel(), new OutputElementStyle(null, JpfThreadStyle.FIELD_ACCESS.toMap()));
+        STYLE_MAP = builder.build();
     }
 
     private final JpfKernelAnalysisModule fModule;
@@ -144,8 +148,10 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
     static {
         ImmutableList.Builder<@NonNull String> builder = new ImmutableList.Builder<>();
 
-        builder.add(JpfThreadStyle.LOCK.getLabel());
-        builder.add(JpfThreadStyle.EXPOSE.getLabel());
+        builder.add(JpfThreadStyle.SYNC.getLabel());
+        builder.add(JpfThreadStyle.METHOD_CALL.getLabel());
+        builder.add(JpfThreadStyle.LOCK_UNLOCK.getLabel());
+        builder.add(JpfThreadStyle.FIELD_ACCESS.getLabel());
         ANNOTATION_CAT_LIST = builder.build();
     }
 
@@ -154,7 +160,7 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
     public JpfThreadStatusDataProvider(@NonNull ITmfTrace trace, JpfKernelAnalysisModule module) {
         super(trace);
         fModule = module;
-        System.out.println("JpfThreadStatusDataProvider::constructor");
+        // System.out.println("JpfThreadStatusDataProvider::constructor");
     }
 
     @Override
@@ -462,6 +468,20 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
         return times;
     }
 
+    private static @NonNull Collection<@NonNull Long> getAllTimes(ITmfStateSystem ss) {
+        long start = ss.getStartTime();
+        long end = ss.getCurrentEndTime();
+
+        // System.out.println("Start: " + String.valueOf(start));
+        // System.out.println("End: " + String.valueOf(end));
+
+        Collection<@NonNull Long> times = new HashSet<>();
+        for (long t = start; t < end; t+=10 ) {
+            times.add(t);
+        }
+        return times;
+    }
+
     private static @NonNull ITimeGraphState createTimeGraphState(ITmfStateInterval interval, NavigableSet<ITmfStateInterval> syscalls) {
         long startTime = interval.getStartTime();
         long duration = interval.getEndTime() - startTime + 1;
@@ -486,7 +506,12 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     private static @NonNull OutputElementStyle getElementStyle(int stateValue) {
         String styleFor = getStyleFor(stateValue);
-        return STYLE_MAP.computeIfAbsent(styleFor, style -> new OutputElementStyle(style));
+        OutputElementStyle style = STYLE_MAP.get(styleFor) ;
+        if (style != null) {
+            return style;
+        }
+        return new OutputElementStyle("");
+        // return STYLE_MAP.computeIfAbsent(styleFor, style -> new OutputElementStyle(style));
     }
 
     private static @NonNull String getStyleFor(int stateValue) {
@@ -507,10 +532,14 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
             return LinuxStyle.WAIT_UNKNOWN.getLabel();
         case LINK_VALUE:
             return LinuxStyle.LINK.getLabel();
-        case LOCK_VALUE:
-            return JpfThreadStyle.LOCK.getLabel();
-        case EXPOSE_VALUE:
-            return JpfThreadStyle.EXPOSE.getLabel();
+        case SYNC_VALUE:
+            return JpfThreadStyle.SYNC.getLabel();
+        case METHOD_CALL_VALUE:
+            return JpfThreadStyle.METHOD_CALL.getLabel();
+        case LOCK_UNLOCK_VALUE:
+            return JpfThreadStyle.LOCK_UNLOCK.getLabel();
+        case FIELD_ACCESS_VALUE:
+            return JpfThreadStyle.FIELD_ACCESS.getLabel();
         default:
             return LinuxStyle.UNKNOWN.getLabel();
         }
@@ -688,101 +717,158 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     @Override
     public TmfModelResponse<OutputStyleModel> fetchStyle(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
-        return new TmfModelResponse<>(new OutputStyleModel(STATE_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        return new TmfModelResponse<>(new OutputStyleModel(STYLE_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
     // ANNOTATION_CAT_LIST: List<String>
     @Override
     public TmfModelResponse<AnnotationCategoriesModel> fetchAnnotationCategories(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
-        System.out.println("JpfThreadStatusDataProvider::fetchAnnotationCategories");
-        System.out.println("Category size: " + String.valueOf(ANNOTATION_CAT_LIST.size()));
+        // System.out.println("JpfThreadStatusDataProvider::fetchAnnotationCategories");
+        // System.out.println("Category size: " + String.valueOf(ANNOTATION_CAT_LIST.size()));
         return new TmfModelResponse<>(new AnnotationCategoriesModel(ANNOTATION_CAT_LIST), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
     }
 
     // ANNOTATION_MAP: Map<String, Collection<Annotation>>
     @Override
     public TmfModelResponse<AnnotationModel> fetchAnnotations(Map<String, Object> fetchParameters, @Nullable IProgressMonitor monitor) {
-        System.out.println("JpfThreadStatusDataProvider::fetchAnnotations");
-        // synchronized (fBuildMap) {
-        //     System.out.println("JpfThreadStatusDataProvider::fetchAnnotations");   
-        //     ITmfStateSystem ss = fModule.getStateSystem();
-        //     if (ss == null) {
-        //         return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
-        //     }
+        // System.out.println("JpfThreadStatusDataProvider::fetchAnnotations");
+        synchronized (fBuildMap) {
 
-        //     List<Integer> tidQuarks = ss.getQuarks(Attributes.CPUS, WILDCARD, Attributes.CURRENT_THREAD);
-        //     Integer tidQuark = -1;
-        //     if (tidQuarks.size() > 0){
-        //         tidQuark = tidQuarks.get(0);
-        //     } else {
-        //         return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.STATE_SYSTEM_FAILED);
-        //     }
+            ITmfStateSystem ss = fModule.getStateSystem();
+            if (ss == null) {
+                return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.ANALYSIS_INITIALIZATION_FAILED);
+            }
 
-        //     // Map<String, Collection<Annotation>> ret = new HashMap<>();
-        //     List<Integer> lockQuarks = ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.LOCK);
-        //     List<Integer> exposeQuarks = ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.EXPOSE);
-        //     TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(fetchParameters);
-        //     Collection<Long> times = getTimes(ss, filter);
+            List<Integer> tidQuarks = ss.getQuarks(Attributes.CPUS, WILDCARD, Attributes.CURRENT_THREAD);
+            Integer tidQuark = -1;
+            if (tidQuarks.size() > 0){
+                tidQuark = tidQuarks.get(0);
+            } else {
+                return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.STATE_SYSTEM_FAILED);
+            }
 
-        //     Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>();
-        //     Collection<Annotation> lockCollection = new ArrayList<>();
-        //     Collection<Annotation> exposeCollection = new ArrayList<>();
+            List<Integer> specQuarks = ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.SPEC);
+            // System.out.println("Queried quarks: " + String.valueOf(specQuarks.size()));
+            Collection<Long> times = getAllTimes(ss);
+            // List<Integer> detailQuarks = ss.getQuarks(Attributes.THREADS, WILDCARD, Attributes.DETAIL);
+            // TimeQueryFilter filter = FetchParametersUtils.createTimeQuery(fetchParameters);
+            // Collection<Long> times = getTimes(ss, filter);
+            // System.out.println("Time Elapse: " + String.valueOf(times.size()));
+            // for (Long time : times) {
+            //     System.out.println(String.valueOf(time));
+            // }
+            
+            // List<Long> timeRequested = DataProviderParameterUtils.extractTimeRequested(fetchParameters);
+            // System.out.println("Time Requested");
+            // if (timeRequested != null) {
+            //     for( Long time : timeRequested) {
+            //         System.out.println(String.valueOf(time));
+            //     }
+            // }
 
-        //     for (Long t : times) {
+            // System.out.println("fTidToEntry size: " + String.valueOf(fTidToEntry.size()));
+            // for (Map.Entry<Integer, ThreadEntryModel.Builder> e : fTidToEntry.entries()) {
+            //     System.out.println(String.valueOf(e));
+            // }
 
-        //         Integer tid = -1;
-        //         try {
-        //             ITmfStateInterval currentThreadInterval = ss.querySingleState(t, tidQuark);
-        //             tid = (Integer)currentThreadInterval.getValue();
-        //             if (tid == null) {
-        //                 return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, CommonStatusMessage.STATE_SYSTEM_FAILED);
-        //             }
-        //         } catch(TimeRangeException | StateSystemDisposedException e) {
-        //             return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
-        //         }
+            Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>();
+            Collection<Annotation> syncCollection = new ArrayList<>();
+            Collection<Annotation> methodCallCollection = new ArrayList<>();
+            Collection<Annotation> lockUnlockCollection = new ArrayList<>();
+            Collection<Annotation> fieldAccessCollection = new ArrayList<>();
 
-        //         for (Integer quark : lockQuarks) {
-        //             try {
-        //                 ITmfStateInterval lockEventInterval = ss.querySingleState(t, quark);
-        //                 Long time = (Long)lockEventInterval.getValue();
-        //                 if (time != null && t.equals(time)) {
-        //                     System.out.println("JpfThreadStatusDataProvider::FetchAnnotation: LOCK event timestamp matches");
-        //                     // Annotation anno = new Annotation(timestamp, 0, entryId, label, getElementStyle(JpfThreadStyle.LOCK.getLabel()))
-        //                     Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.LOCK.getLabel(), getElementStyle(LOCK_VALUE));
-        //                     lockCollection.add(anno);
-        //                 }
-        //             } catch (TimeRangeException | StateSystemDisposedException e) {
-        //                 return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
-        //             }
-        //         }
+            // TreeMultimap<Integer, ITmfStateInterval> currentThreadIntervalsMap = TreeMultimap.create(
+            //     Comparator.naturalOrder(),
+            //     Comparator.comparing(ITmfStateInterval::getStartTime));
+            // try {
+            //     for (ITmfStateInterval interval : ss.query2D(quarks, times)) {
+            //         if (monitor != null && monitor.isCanceled()) {
+            //             return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+            //         }
+            //         currentThreadIntervalsMap.put(interval.getAttribute(), interval);
+            //     }
 
-        //         for (Integer quark : exposeQuarks) {
-        //             try {
-        //                 ITmfStateInterval exposeEventInterval = ss.querySingleState(t, quark);
-        //                 Long time = (Long)exposeEventInterval.getValue();
-        //                 if (time != null && t.equals(time)) {
-        //                     System.out.println("JpfThreadStatusDataProvider::FetchAnnotation: EXPOSE event timestamp matches");
-        //                     Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.EXPOSE.getLabel(), getElementStyle(EXPOSE_VALUE));
-        //                     exposeCollection.add(anno);
-        //                 }
-        //             } catch (TimeRangeException | StateSystemDisposedException e) {
-        //                 return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
-        //             }
-        //         }
-        //     }
+            //     for (Collection<ITmfStateInterval> currentThreadIntervals : currentThreadIntervalsMap.asMap().values()) {
 
-        //     ANNOTATION_MAP.put(JpfThreadStyle.LOCK.getLabel(), lockCollection);      
-        //     ANNOTATION_MAP.put(JpfThreadStyle.EXPOSE.getLabel(), exposeCollection);            
-        //     return new TmfModelResponse<>(new AnnotationModel(ANNOTATION_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
-        // }
-        Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>(); 
-        Collection<Annotation> lockCollection = new ArrayList<>();
-        Collection<Annotation> exposeCollection = new ArrayList<>(); 
+            //         for (ITmfStateInterval interval : currentThreadIntervals) {
 
-        ANNOTATION_MAP.put(JpfThreadStyle.LOCK.getLabel(), lockCollection);      
-        ANNOTATION_MAP.put(JpfThreadStyle.EXPOSE.getLabel(), exposeCollection); 
+            //             if (monitor != null && monitor.isCanceled()) {
+            //                 return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+            //             }
 
-        return new TmfModelResponse<>(new AnnotationModel(ANNOTATION_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+            //         }
+            //         linkList.addAll(createCpuArrows(ss, (NavigableSet<ITmfStateInterval>) currentThreadIntervals));
+            //     }
+
+            // }
+
+            for (Long t : times) {
+
+                Integer tid = -1;
+                try {
+                    ITmfStateInterval currentThreadInterval = ss.querySingleState(t, tidQuark);
+                    tid = (Integer)currentThreadInterval.getValue();
+                    if (tid == null) {
+                        continue;
+                    }
+                } catch(TimeRangeException | StateSystemDisposedException e) {
+                    return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
+                }
+
+                for (Integer quark : specQuarks) {
+
+                    try {
+
+                        if (monitor != null && monitor.isCanceled()) {
+                            System.out.println("Task cancelled");
+                            return new TmfModelResponse<>(null, ITmfResponse.Status.CANCELLED, CommonStatusMessage.TASK_CANCELLED);
+                        }
+
+                        ITmfStateInterval specInterval = ss.querySingleState(t, quark);
+                        String content = (String) specInterval.getValue();
+
+                        if (content != null) {
+
+                                if (content.contains("isSync")) {
+                                    Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.SYNC.getLabel(), getElementStyle(SYNC_VALUE));
+                                    // System.out.println("Creating sync");
+                                    syncCollection.add(anno);
+                                }
+
+                                if (content.contains("isMethodCall")) {
+                                    Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.METHOD_CALL.getLabel(), getElementStyle(METHOD_CALL_VALUE));
+                                    // System.out.println("Creating mc");
+                                    methodCallCollection.add(anno);
+                                }
+
+                                if (content.contains("isThreadRelatedMethod")) {
+                                    Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.LOCK_UNLOCK.getLabel(), getElementStyle(LOCK_UNLOCK_VALUE));
+                                    // System.out.println("Creating lockunlock");
+                                    lockUnlockCollection.add(anno);
+                                }
+
+                                if (content.contains("isFieldAccess")) {
+
+                                    Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.FIELD_ACCESS.getLabel(), getElementStyle(FIELD_ACCESS_VALUE));
+                                    // System.out.println("Creating fieldaccess");
+                                    fieldAccessCollection.add(anno);
+
+                                }
+                        }
+                    } catch (TimeRangeException | StateSystemDisposedException e) {
+                        // System.out.println("Exception");
+                        e.printStackTrace();
+                        return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
+                    }
+                }
+            }
+
+            ANNOTATION_MAP.put(JpfThreadStyle.SYNC.getLabel(), syncCollection);    
+            ANNOTATION_MAP.put(JpfThreadStyle.METHOD_CALL.getLabel(), methodCallCollection);  
+            ANNOTATION_MAP.put(JpfThreadStyle.LOCK_UNLOCK.getLabel(), lockUnlockCollection);    
+            ANNOTATION_MAP.put(JpfThreadStyle.FIELD_ACCESS.getLabel(), fieldAccessCollection);
+            return new TmfModelResponse<>(new AnnotationModel(ANNOTATION_MAP), ITmfResponse.Status.COMPLETED, CommonStatusMessage.COMPLETED);
+        }
     }
  
 }

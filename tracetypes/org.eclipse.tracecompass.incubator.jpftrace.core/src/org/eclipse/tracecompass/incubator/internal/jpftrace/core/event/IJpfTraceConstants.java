@@ -2,7 +2,7 @@ package org.eclipse.tracecompass.incubator.internal.jpftrace.core.event;
 
 public interface IJpfTraceConstants {
 
-    String TRANSITION_ID = "transitionId"; 
+    String ID = "id"; 
 
     String BASE_TIME = "time";
 
