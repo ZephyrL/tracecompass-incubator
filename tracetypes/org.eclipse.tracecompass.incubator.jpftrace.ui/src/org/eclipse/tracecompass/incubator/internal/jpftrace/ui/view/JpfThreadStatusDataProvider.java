@@ -70,6 +70,7 @@ import org.eclipse.tracecompass.tmf.core.util.Pair;
 
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfKernelAnalysisModule;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.Attributes;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceField;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.ui.style.JpfThreadStyle;
 
 import com.google.common.collect.ImmutableList;
@@ -815,6 +816,23 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
                     return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
                 }
 
+                Long formerT = t - JpfTraceField.sDuration;
+
+                Integer formerTid = -1;
+                try {
+                    if (formerT < ss.getStartTime()) {
+                        formerTid = -1;
+                    } else {
+                        ITmfStateInterval formerThreadInterval = ss.querySingleState(formerT, tidQuark);
+                        formerTid = (Integer) formerThreadInterval.getValue();
+                        if (formerTid == null) {
+                            formerTid = -1;
+                        }
+                    }
+                } catch(TimeRangeException | StateSystemDisposedException e) {
+                    return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));
+                }
+
                 for (Integer quark : specQuarks) {
 
                     try {
@@ -825,35 +843,39 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
                         }
 
                         ITmfStateInterval specInterval = ss.querySingleState(t, quark);
+                        ITmfStateInterval formerSpecInterval = ss.querySingleState(formerT, quark);
                         String content = (String) specInterval.getValue();
+                        String formerContent = (String) formerSpecInterval.getValue();
 
                         if (content != null) {
-
-                                if (content.contains("isSync")) {
+                            if (content.contains("isSync")) {
+                                if ((!formerTid.equals(tid)) || ((formerContent != null) && (!formerContent.contains("isSync")))) {
                                     Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.SYNC.getLabel(), getElementStyle(SYNC_VALUE));
-                                    // System.out.println("Creating sync");
                                     syncCollection.add(anno);
                                 }
+                            }
 
-                                if (content.contains("isMethodCall")) {
+                            if (content.contains("isMethodCall")) {
+                                if ((!formerTid.equals(tid)) || ((formerContent != null) && (!formerContent.contains("isMethodCall")))) {
                                     Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.METHOD_CALL.getLabel(), getElementStyle(METHOD_CALL_VALUE));
-                                    // System.out.println("Creating mc");
                                     methodCallCollection.add(anno);
                                 }
+                            }
 
-                                if (content.contains("isThreadRelatedMethod")) {
+                            if (content.contains("isThreadRelatedMethod")) {
+                                if ((!formerTid.equals(tid)) || ((formerContent != null) && (!formerContent.contains("isThreadRelatedMethod")))) {
                                     Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.LOCK_UNLOCK.getLabel(), getElementStyle(LOCK_UNLOCK_VALUE));
-                                    // System.out.println("Creating lockunlock");
                                     lockUnlockCollection.add(anno);
                                 }
+                            }
 
-                                if (content.contains("isFieldAccess")) {
-
+                            if (content.contains("isFieldAccess")) {
+                                if ((!formerTid.equals(tid)) || ((formerContent != null) && (!formerContent.contains("isFieldAccess")))) {
                                     Annotation anno = new Annotation(t, 0, findEntry(tid, t), JpfThreadStyle.FIELD_ACCESS.getLabel(), getElementStyle(FIELD_ACCESS_VALUE));
-                                    // System.out.println("Creating fieldaccess");
                                     fieldAccessCollection.add(anno);
-
                                 }
+
+                            }
                         }
                     } catch (TimeRangeException | StateSystemDisposedException e) {
                         // System.out.println("Exception");

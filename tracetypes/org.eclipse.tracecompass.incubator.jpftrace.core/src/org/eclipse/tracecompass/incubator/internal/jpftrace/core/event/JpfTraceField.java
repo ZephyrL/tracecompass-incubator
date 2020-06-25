@@ -31,7 +31,7 @@ public class JpfTraceField {
     private static Integer sThreadId = -1;
     private static String sThreadName = "";
     private static Long pseudoTime = 0L;
-    private static final Long sDuration = 10L;
+    public static final Long sDuration = 10L;
 
     private final String fType;
     private final Integer fThreadId;
