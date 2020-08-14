@@ -15,7 +15,7 @@ import org.eclipse.tracecompass.tmf.core.model.tree.ITmfTreeDataProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 
-import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfKernelAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfAnalysisModule;
 
 public class JpfThreadStatusDataProviderFactory implements IDataProviderFactory {
 
@@ -28,7 +28,7 @@ public class JpfThreadStatusDataProviderFactory implements IDataProviderFactory 
 
     @Override
     public @Nullable ITmfTreeDataProvider<? extends ITmfTreeDataModel> createProvider(@NonNull ITmfTrace trace) {
-        JpfKernelAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, JpfKernelAnalysisModule.class, JpfKernelAnalysisModule.ID);
+        JpfAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, JpfAnalysisModule.class, JpfAnalysisModule.ID);
         // System.out.println("JPFFactory::createProvider: called");
         if (module != null) {
             module.schedule();
@@ -42,7 +42,7 @@ public class JpfThreadStatusDataProviderFactory implements IDataProviderFactory 
 
     @Override
     public Collection<IDataProviderDescriptor> getDescriptors(@NonNull ITmfTrace trace) {
-        JpfKernelAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, JpfKernelAnalysisModule.class, JpfKernelAnalysisModule.ID);
+        JpfAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, JpfAnalysisModule.class, JpfAnalysisModule.ID);
         return module != null ? Collections.singletonList(DESCRIPTOR) : Collections.emptyList();
     }
 

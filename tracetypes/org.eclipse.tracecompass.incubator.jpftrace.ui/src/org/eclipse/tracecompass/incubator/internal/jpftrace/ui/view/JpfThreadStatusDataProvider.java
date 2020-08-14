@@ -68,7 +68,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 
-import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfKernelAnalysisModule;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfAnalysisModule;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.Attributes;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceField;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.ui.style.JpfThreadStyle;
@@ -128,7 +128,7 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
         STYLE_MAP = builder.build();
     }
 
-    private final JpfKernelAnalysisModule fModule;
+    private final JpfAnalysisModule fModule;
     private final long fTraceId = fAtomicLong.getAndIncrement();
 
     private final Map<Long, Integer> fQuarkMap = new HashMap<>();
@@ -158,7 +158,7 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
 
     // private final @NonNull Map<String, Collection<Annotation>> ANNOTATION_MAP = new HashMap<>();
 
-    public JpfThreadStatusDataProvider(@NonNull ITmfTrace trace, JpfKernelAnalysisModule module) {
+    public JpfThreadStatusDataProvider(@NonNull ITmfTrace trace, JpfAnalysisModule module) {
         super(trace);
         fModule = module;
         // System.out.println("JpfThreadStatusDataProvider::constructor");
@@ -822,12 +822,13 @@ public class JpfThreadStatusDataProvider extends AbstractTmfTraceDataProvider im
                 try {
                     if (formerT < ss.getStartTime()) {
                         formerTid = -1;
-                    } else {
-                        ITmfStateInterval formerThreadInterval = ss.querySingleState(formerT, tidQuark);
-                        formerTid = (Integer) formerThreadInterval.getValue();
-                        if (formerTid == null) {
-                            formerTid = -1;
-                        }
+                        continue;
+                    } 
+
+                    ITmfStateInterval formerThreadInterval = ss.querySingleState(formerT, tidQuark);
+                    formerTid = (Integer) formerThreadInterval.getValue();
+                    if (formerTid == null) {
+                        formerTid = -1;
                     }
                 } catch(TimeRangeException | StateSystemDisposedException e) {
                     return new TmfModelResponse<>(null, ITmfResponse.Status.FAILED, String.valueOf(e.getMessage()));

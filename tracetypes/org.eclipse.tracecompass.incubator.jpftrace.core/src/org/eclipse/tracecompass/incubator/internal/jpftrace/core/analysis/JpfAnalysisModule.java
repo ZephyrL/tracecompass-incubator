@@ -30,7 +30,7 @@ import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
-public class JpfKernelAnalysisModule extends TmfStateSystemAnalysisModule {
+public class JpfAnalysisModule extends TmfStateSystemAnalysisModule {
 
     /** The ID of this analysis module */
     public static final String ID = "org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis"; //$NON-NLS-1$
@@ -53,10 +53,8 @@ public class JpfKernelAnalysisModule extends TmfStateSystemAnalysisModule {
             /* Fall-back to the base LttngEventLayout */
             layout = DefaultEventLayout.getInstance();
         }
-
-        // System.out.println("JpfKernelAnalysisModule::createStateProvider: instantiating KernelStateProvider");
-
-        return new JpfKernelStateProvider(trace, layout);
+        
+        return new JpfStateProvider(trace, layout);
     }
 
     @Override

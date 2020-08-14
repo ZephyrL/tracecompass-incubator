@@ -21,6 +21,7 @@ import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.IJpfTrace
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceAspects;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceEvent;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceField;
+import org.eclipse.tracecompass.incubator.internal.jpftrace.core.event.JpfTraceEventTime;
 import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
 import org.eclipse.tracecompass.internal.provisional.jsontrace.core.trace.JsonTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -110,7 +111,7 @@ public class JpfTrace extends JsonTrace implements IKernelTrace {
                 JsonObject root = gson.fromJson(reader, JsonObject.class);
                 JsonElement jsonElement = root.get("time");
                 long baseTime = (jsonElement != null) ? jsonElement.getAsLong() : 0L;
-                JpfTraceField.setPseudoTime(baseTime);
+                JpfTraceEventTime.setPseudoBaseTime(baseTime);
             }
 
         } catch (IOException e) {

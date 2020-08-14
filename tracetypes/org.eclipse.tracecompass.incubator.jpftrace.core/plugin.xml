@@ -26,8 +26,9 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfKernelAnalysisModule"
+            analysis_module="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.JpfAnalysisModule"
             automatic="true"
+            icon="jpf.png"
             id="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis"
             name="%analysis.linuxkernel">
          <tracetype
@@ -36,26 +37,5 @@
          </tracetype>
       </module>
    </extension>
-   <!-- <extension
-         point="org.eclipse.ui.views">
-      <view
-            category="org.eclipse.tracecompass.incubator.internal.traceevent.ui.view.life.ObjectLifeView"
-            class="org.eclipse.tracecompass.incubator.internal.traceevent.ui.view.life.ObjectLifeView"
-            icon="icons/life.png"
-            id="org.eclipse.tracecompass.incubator.traceevent.ui.view.life.objectlife.view"
-            name="Object Lifespan Tracker"
-            restorable="true">
-      </view>
-   </extension>
-   <extension
-         point="org.eclipse.linuxtools.tmf.core.analysis">
-      <output
-            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.incubator.jpftrace.core.view">
-         <analysisModuleClass
-               class="org.eclipse.tracecompass.incubator.internal.traceevent.core.analysis.objectlife.ObjectLifeAnalysis">
-         </analysisModuleClass>
-      </output>
-   </extension> -->
 
 </plugin>

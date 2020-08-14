@@ -90,7 +90,7 @@ import org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis.handle
  *
  * @author Alexandre Montplaisir
  */
-public class JpfKernelStateProvider extends AbstractTmfStateProvider {
+public class JpfStateProvider extends AbstractTmfStateProvider {
 
     // ------------------------------------------------------------------------
     // Static fields
@@ -127,15 +127,13 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
      *            The event layout to use for this state provider. Usually
      *            depending on the tracer implementation.
      */
-    public JpfKernelStateProvider(ITmfTrace trace, IKernelAnalysisEventLayout layout) {
+    public JpfStateProvider(ITmfTrace trace, IKernelAnalysisEventLayout layout) {
         super(trace, "Kernel"); //$NON-NLS-1$
         fLayout = layout;
         fEventNames = buildEventNames(layout);
 
         fSysEntryHandler = new SysEntryHandler(fLayout);
         fSysExitHandler = new SysExitHandler(fLayout);
-
-        // System.out.println("JpfKernelStateProvider::constructor");
     }
 
     // ------------------------------------------------------------------------
@@ -198,8 +196,8 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
     }
 
     @Override
-    public JpfKernelStateProvider getNewInstance() {
-        return new JpfKernelStateProvider(this.getTrace(), fLayout);
+    public JpfStateProvider getNewInstance() {
+        return new JpfStateProvider(this.getTrace(), fLayout);
     }
 
     @Override
@@ -225,10 +223,11 @@ public class JpfKernelStateProvider extends AbstractTmfStateProvider {
                 }
             }
             if (handler != null) {
-                // if (handler instanceof SchedSwitchHandler || handler instanceof SchedWakeupHandler) {
-                //     System.out.println("JpfKernelStateProvider::Recognized as thread related event");
-                // }
                 handler.handleEvent(ss, event);
+
+                // if (handler instanceof SchedSwitchHandler || handler instanceof SchedWakeupHandler) {
+                //     System.out.println("JpfStateProvider::Recognized as thread related event");
+                // }
             }
 
         } catch (AttributeNotFoundException ae) {

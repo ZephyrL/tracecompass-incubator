@@ -2,27 +2,19 @@ package org.eclipse.tracecompass.incubator.internal.jpftrace.core.event;
 
 import java.util.HashMap;
 import java.util.Map;
-// import java.util.Map.Entry;
-// import java.util.Objects;
-// import java.util.stream.Collectors;
 import java.util.ArrayList;
 
-// import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-// import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.kernel.LinuxValues;
-// import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
-// import com.google.common.collect.ImmutableMap;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-// import org.eclipse.tracecompass.incubator.internal.jpftrace.core.layout.JpfTraceEventLayout;
 /**
  * JPF Trace fields.
  */
@@ -30,7 +22,7 @@ public class JpfTraceField {
 
     private static Integer sThreadId = -1;
     private static String sThreadName = "";
-    private static Long pseudoTime = 0L;
+    // private static Long pseudoTime = 0L;
     public static final Long sDuration = 10L;
 
     private final String fType;
@@ -50,10 +42,12 @@ public class JpfTraceField {
 
         Integer id = (Integer) fields.get(IJpfTraceConstants.ID);
         if (id != null) {
-            fTimestamp = getPseudoTime() + sDuration * id;
+            // getEventTime() automatically assign the duration to event
+            // if want to manually set the duration, try overloading this method
+            fTimestamp = JpfTraceEventTime.getEventTime(id);
         } else {
             System.out.println("JpfTraceField, warning: event doesn't have an ID");
-            fTimestamp = getPseudoTime();
+            fTimestamp = JpfTraceEventTime.getPseudoBaseTime();
         }
 
         fChoices = new ArrayList<>();
@@ -72,10 +66,12 @@ public class JpfTraceField {
 
         Integer id = (Integer) fields.get(IJpfTraceConstants.ID);
         if (id != null) {
-            fTimestamp = getPseudoTime() + sDuration * id;
+            // getEventTime() automatically assign the duration to event
+            // if want to manually set the duration, try overloading this method
+            fTimestamp = JpfTraceEventTime.getEventTime(id);
         } else {
             System.out.println("JpfTraceField, warning: event doesn't have an ID");
-            fTimestamp = getPseudoTime();
+            fTimestamp = JpfTraceEventTime.getPseudoBaseTime();
         }
 
         fChoices = choices;
@@ -91,13 +87,13 @@ public class JpfTraceField {
     //     System.out.println(s);
     // }
 
-    public static void setPseudoTime(long value) {
-        pseudoTime = value;
-    }
+    // public static void setPseudoTime(long value) {
+    //     pseudoTime = value;
+    // }
 
-    public static long getPseudoTime() {
-        return pseudoTime;
-    }
+    // public static long getPseudoTime() {
+    //     return pseudoTime;
+    // }
 
     /**
      * Parse a JSON string
@@ -127,7 +123,7 @@ public class JpfTraceField {
             // get common k-v pairs of threadInfo
             Integer threadId = optInt(root, IJpfTraceConstants.THREAD_ID);
             String threadName = optString(root, IJpfTraceConstants.THREAD_NAME);
-            String threadState = optString(root, IJpfTraceConstants.THREAD_STATE);
+            // String threadState = optString(root, IJpfTraceConstants.THREAD_STATE);
             String threadEntryMethod = optString(root, IJpfTraceConstants.THREAD_ENTRY_METHOD);
 
             // update static fields: thread id and name
@@ -136,14 +132,57 @@ public class JpfTraceField {
             if (threadName != null) {
                 sThreadName = threadName;
             }
-            // TODO: return JpfTraceField
-            fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadInfo");
 
             fieldsMap.put(IJpfTraceConstants.THREAD_ID, threadId);
             fieldsMap.put(IJpfTraceConstants.THREAD_NAME, threadName);
-            fieldsMap.put(IJpfTraceConstants.THREAD_STATE, threadState);
+            // fieldsMap.put(IJpfTraceConstants.THREAD_STATE, threadState);
             fieldsMap.put(IJpfTraceConstants.THREAD_ENTRY_METHOD, threadEntryMethod);
 
+            // threadinfo + threadswitch
+            if (optBoolean(root, IJpfTraceConstants.THREAD_SWITCH) != null) {
+                String prevComm = optString(root, IJpfTraceConstants.PREV_COMM);
+                Integer prevPid = optInt(root, IJpfTraceConstants.PREV_PID);
+                String nextComm = optString(root, IJpfTraceConstants.NEXT_COMM);
+                Integer nextPid = optInt(root, IJpfTraceConstants.NEXT_PID);
+
+                fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadSwitch");
+                fieldsMap.put(IJpfTraceConstants.THREAD_ID, sThreadId);
+                fieldsMap.put(IJpfTraceConstants.THREAD_NAME, sThreadName);
+
+                fieldsMap.put(IJpfTraceConstants.PREV_COMM, prevComm);
+                fieldsMap.put(IJpfTraceConstants.PREV_PID, prevPid);
+                fieldsMap.put(IJpfTraceConstants.NEXT_COMM, nextComm);
+                fieldsMap.put(IJpfTraceConstants.NEXT_PID, nextPid);
+
+                fieldsMap.put(IJpfTraceConstants.PREV_PRIO, 100);
+                fieldsMap.put(IJpfTraceConstants.NEXT_PRIO, 100);
+                fieldsMap.put(IJpfTraceConstants.PREV_STATE, (long) LinuxValues.TASK_STATE_RUNNING);
+
+                // TODO
+                return new JpfTraceField(fieldsMap);
+            }
+
+            // threadinfo + threadawake
+            if (optBoolean(root, IJpfTraceConstants.THREAD_AWAKE) != null) {
+
+                String comm = optString(root, IJpfTraceConstants.COMM);
+                Integer tid = optInt(root, IJpfTraceConstants.TID);
+
+                fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadAwake");
+                fieldsMap.put(IJpfTraceConstants.THREAD_ID, sThreadId);
+                fieldsMap.put(IJpfTraceConstants.THREAD_NAME, sThreadName);
+
+                fieldsMap.put(IJpfTraceConstants.COMM, comm);
+                fieldsMap.put(IJpfTraceConstants.TID, tid);
+                fieldsMap.put(IJpfTraceConstants.PRIO, 100);
+                fieldsMap.put(IJpfTraceConstants.SUCCESS, 1);
+                fieldsMap.put(IJpfTraceConstants.TARGET_CPU, 0);
+
+                // TODO
+                return new JpfTraceField(fieldsMap);
+            }
+
+            fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadInfo");
             return new JpfTraceField(fieldsMap);
         }
 
@@ -171,47 +210,6 @@ public class JpfTraceField {
             return new JpfTraceField(fieldsMap, choices);
         }
 
-        if (optBoolean(root, IJpfTraceConstants.THREAD_SWITCH) != null) {
-            String prevComm = optString(root, IJpfTraceConstants.PREV_COMM);
-            Integer prevPid = optInt(root, IJpfTraceConstants.PREV_PID);
-            String nextComm = optString(root, IJpfTraceConstants.NEXT_COMM);
-            Integer nextPid = optInt(root, IJpfTraceConstants.NEXT_PID);
-
-            fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadSwitch");
-            fieldsMap.put(IJpfTraceConstants.THREAD_ID, sThreadId);
-            fieldsMap.put(IJpfTraceConstants.THREAD_NAME, sThreadName);
-
-            fieldsMap.put(IJpfTraceConstants.PREV_COMM, prevComm);
-            fieldsMap.put(IJpfTraceConstants.PREV_PID, prevPid);
-            fieldsMap.put(IJpfTraceConstants.NEXT_COMM, nextComm);
-            fieldsMap.put(IJpfTraceConstants.NEXT_PID, nextPid);
-
-            fieldsMap.put(IJpfTraceConstants.PREV_PRIO, 100);
-            fieldsMap.put(IJpfTraceConstants.NEXT_PRIO, 100);
-            fieldsMap.put(IJpfTraceConstants.PREV_STATE, (long) LinuxValues.TASK_STATE_RUNNING);
-
-            // TODO
-            return new JpfTraceField(fieldsMap);
-        }
-
-        if (optBoolean(root, IJpfTraceConstants.THREAD_AWAKE) != null) {
-
-            String comm = optString(root, IJpfTraceConstants.COMM);
-            Integer tid = optInt(root, IJpfTraceConstants.TID);
-
-            fieldsMap.put(IJpfTraceConstants.TYPE, "ThreadAwake");
-            fieldsMap.put(IJpfTraceConstants.THREAD_ID, sThreadId);
-            fieldsMap.put(IJpfTraceConstants.THREAD_NAME, sThreadName);
-
-            fieldsMap.put(IJpfTraceConstants.COMM, comm);
-            fieldsMap.put(IJpfTraceConstants.TID, tid);
-            fieldsMap.put(IJpfTraceConstants.PRIO, 100);
-            fieldsMap.put(IJpfTraceConstants.SUCCESS, 1);
-            fieldsMap.put(IJpfTraceConstants.TARGET_CPU, 0);
-
-            // TODO
-            return new JpfTraceField(fieldsMap);
-        }
 
         if (optString(root, IJpfTraceConstants.SRC) != null) {
             String src = optString(root, IJpfTraceConstants.SRC);

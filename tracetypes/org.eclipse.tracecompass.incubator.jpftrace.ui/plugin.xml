@@ -32,15 +32,4 @@
             tracetype="org.eclipse.tracecompass.incubator.jpftrace.core">
       </type>
    </extension>
-
-   <!-- <extension
-         point="org.eclipse.linuxtools.tmf.core.analysis">
-      <output
-            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
-            id="org.eclipse.tracecompass.incubator.jpftrace.ui.view">
-         <analysisModuleClass
-               class="org.eclipse.tracecompass.incubator.internal.jpftrace.core.analysis">
-         </analysisModuleClass>
-      </output>
-   </extension> -->
 </plugin>
