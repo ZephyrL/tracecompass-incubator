@@ -31,6 +31,10 @@ public class Messages extends NLS {
 
     public static @Nullable String JpfTraceAspects_SourceD;
 
+    public static @Nullable String JpfTraceAspects_InstructionType;
+
+    public static @Nullable String JpfTraceAspects_InstructionTypeD;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

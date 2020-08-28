@@ -39,9 +39,16 @@ public class ThreadInfoHandler extends KernelEventHandler {
 
         String threadAttributeName = Attributes.buildThreadAttributeName(tid, cpu);
         final int threadNode = ss.getQuarkRelativeAndAdd(KernelEventHandlerUtils.getNodeThreads(ss), threadAttributeName);
+        // System.out.println("Threadinfo Handler: tid: " + String.valueOf(tid));
         final int threadEntryMethodNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.ENTRY_METHOD);
+        final int specNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.SPEC);
+        final int detailNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.DETAIL);
 
         ss.modifyAttribute(timestamp, threadEntryMethod, threadEntryMethodNode);
+
+        // set the state of special instructions to null
+        ss.modifyAttribute(timestamp, "", specNode);
+        ss.modifyAttribute(timestamp, "", detailNode);
 
         // ITmfStateValue value = ss.queryOngoingState(choideMadeNode);
         // System.out.println("ChoiceInfoHandler::value " + String.valueOf(value.unboxValue()));

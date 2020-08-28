@@ -26,6 +26,7 @@ public class JpfTraceAspects {
                     new JpfTraceCpuAspect(),
                     TmfBaseAspects.getTimestampAspect(),
                     TmfBaseAspects.getEventTypeAspect(),
+                    new JpfTraceInstructionTypeAspect(),
                     new JpfTraceThreadNameAspect(),
                     // new JpfTraceThreadStateAspect(),
                     new JpfTraceChoiceAspect(),
@@ -88,6 +89,23 @@ public class JpfTraceAspects {
         @Override
         public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
             return event.getField().getThreadName();
+        }
+    }
+
+    private static class JpfTraceInstructionTypeAspect implements IJpfTraceAspect<String> {
+        @Override
+        public @NonNull String getName() {
+            return String.valueOf(Messages.JpfTraceAspects_InstructionType);
+        }
+
+        @Override
+        public @NonNull String getHelpText() {
+            return String.valueOf(Messages.JpfTraceAspects_InstructionTypeD);
+        }
+
+        @Override
+        public String resolveJpfTraceLogs(@NonNull JpfTraceEvent event) {
+            return event.getField().getInstructionSpecAndDetail()[0];
         }
     }
     

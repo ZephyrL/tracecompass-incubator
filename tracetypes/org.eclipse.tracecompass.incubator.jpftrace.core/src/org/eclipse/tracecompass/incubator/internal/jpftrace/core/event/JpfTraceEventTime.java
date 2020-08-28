@@ -48,4 +48,8 @@ public class JpfTraceEventTime {
 
         return t;
     }
+
+    public static Long getTimeStep() {
+        return stepTime;
+    }
 }

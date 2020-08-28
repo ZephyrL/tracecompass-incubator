@@ -72,9 +72,6 @@ public interface Attributes {
     String SPEC = "Special_instruction";
     String DETAIL = "Instruction_detail";
 
-    String EXPOSE = "Expose";
-    String LOCK = "Lock";
-
     public static @Nullable String buildThreadAttributeName(int threadId, @Nullable Integer cpuId) {
         if (threadId == 0) {
             if (cpuId == null) {

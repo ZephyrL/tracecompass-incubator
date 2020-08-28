@@ -9,13 +9,13 @@ import com.google.common.collect.ImmutableMap;
 
 public enum JpfThreadStyle {
 
-    SYNC(String.valueOf(Messages.JpfThreadStyle_sync), 0, 100, 200, 255, 0.25f, StyleProperties.SymbolType.DIAMOND),
+    SYNC(String.valueOf(Messages.JpfThreadStyle_sync), 0, 100, 200, 255, 0.5f, StyleProperties.SymbolType.DIAMOND),
 
-    METHOD_CALL(String.valueOf(Messages.JpfThreadStyle_method_call), 200, 40, 100, 255, 0.30f, StyleProperties.SymbolType.INVERTED_TRIANGLE),
+    METHOD_CALL(String.valueOf(Messages.JpfThreadStyle_method_call), 200, 40, 100, 255, 0.6f, StyleProperties.SymbolType.INVERTED_TRIANGLE),
 
-    LOCK_UNLOCK(String.valueOf(Messages.JpfThreadStyle_lock_unlock), 255, 200, 100, 255, 0.25f, StyleProperties.SymbolType.CROSS),
+    LOCK_UNLOCK(String.valueOf(Messages.JpfThreadStyle_lock_unlock), 255, 200, 100, 255, 0.5f, StyleProperties.SymbolType.CROSS),
 
-    FIELD_ACCESS(String.valueOf(Messages.JpfThreadStyle_field_access), 100, 255, 200, 255, 0.35f, StyleProperties.SymbolType.CIRCLE);
+    FIELD_ACCESS(String.valueOf(Messages.JpfThreadStyle_field_access), 100, 255, 200, 255, 0.7f, StyleProperties.SymbolType.CIRCLE);
 
     private final Map<String, Object> fMap;
     

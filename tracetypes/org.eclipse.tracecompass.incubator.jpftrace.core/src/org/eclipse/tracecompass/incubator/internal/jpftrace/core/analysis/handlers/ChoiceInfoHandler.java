@@ -57,13 +57,20 @@ public class ChoiceInfoHandler extends KernelEventHandler {
         
         String threadAttributeName = Attributes.buildThreadAttributeName(tid, cpu);
         final int threadNode = ss.getQuarkRelativeAndAdd(KernelEventHandlerUtils.getNodeThreads(ss), threadAttributeName);
+        // System.out.println("Choiceinfo Handler: tid: " + String.valueOf(tid));
         final int choiceNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.CHOICE);
         final int choiceIdNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.CHOICE_ID);
         final int choideMadeNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.CHOICE_MADE);
+        final int specNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.SPEC);
+        final int detailNode = ss.getQuarkRelativeAndAdd(threadNode, Attributes.DETAIL);
 
         ss.modifyAttribute(timestamp, currentChoice, choiceNode);
         ss.modifyAttribute(timestamp, choiceId, choiceIdNode);
         ss.modifyAttribute(timestamp, choiceMadeString, choideMadeNode);
+
+        // set the state of special instructions to null
+        ss.modifyAttribute(timestamp, "", specNode);
+        ss.modifyAttribute(timestamp, "", detailNode);
 
         // ITmfStateValue value = ss.queryOngoingState(choideMadeNode);
         // System.out.println("ChoiceInfoHandler::value " + String.valueOf(value.unboxValue()));

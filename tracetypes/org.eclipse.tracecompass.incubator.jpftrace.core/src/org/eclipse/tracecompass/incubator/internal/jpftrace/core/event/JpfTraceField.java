@@ -186,6 +186,7 @@ public class JpfTraceField {
             return new JpfTraceField(fieldsMap);
         }
 
+        // choice info event
         if (optString(root, IJpfTraceConstants.CHOICE_ID) != null) {
             String choiceId = optString(root, IJpfTraceConstants.CHOICE_ID);
             String currentChoice = optString(root, IJpfTraceConstants.CURRENT_CHOICE);
@@ -211,6 +212,7 @@ public class JpfTraceField {
         }
 
 
+        // instruction event
         if (optString(root, IJpfTraceConstants.SRC) != null) {
             String src = optString(root, IJpfTraceConstants.SRC);
 
@@ -337,5 +339,83 @@ public class JpfTraceField {
 
     public ArrayList<String> getChoices() {
         return fChoices;
+    }
+
+    public String[] getInstructionSpecAndDetail() {
+
+        String src = fContent.getFieldValue(String.class, IJpfTraceConstants.SRC);
+        if (src == null) {
+            // System.out.println("JpfTraceField::getInstructionSpecAndDetail: source code not found");
+            return new String[] {"", ""};
+        }
+
+        StringBuilder specBuilder = new StringBuilder();
+        StringBuilder detailBuilder = new StringBuilder();
+        boolean isSpec = false;
+
+        Boolean isSync = fContent.getFieldValue(Boolean.class, IJpfTraceConstants.IS_SYNCHRONIZED);
+        if (isSync != null) {
+            specBuilder.append("Sync");
+            String detail = fContent.getFieldValue(String.class, IJpfTraceConstants.SYNC_METHOD_NAME);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("JpfTraceField::getInstructionSpecAndDetail: Warning, the insn is SYNC but has no detail");
+            }
+            isSpec = true;
+        }
+
+        Boolean isMethodCall = fContent.getFieldValue(Boolean.class, IJpfTraceConstants.IS_METHOD_CALL);
+        if (isMethodCall != null) {
+            if (isSpec) {
+                specBuilder.append(" | ");
+                detailBuilder.append(" | ");
+            }
+
+            specBuilder.append("MethodCall");
+            String detail = fContent.getFieldValue(String.class, IJpfTraceConstants.CALLED_METHOD_NAME);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("JpfTraceField::getInstructionSpecAndDetail: Warning, the insn is METHOD CALL but has no detail");
+            }
+            isSpec = true;
+        }
+
+        Boolean isThreadRelatedMethod = fContent.getFieldValue(Boolean.class, IJpfTraceConstants.IS_THREAD_RELATED_METHOD);
+        if (isThreadRelatedMethod != null) {
+            if (isSpec) {
+                specBuilder.append(" | ");
+                detailBuilder.append(" | ");
+            }
+
+            specBuilder.append("Lock/Unlock");
+            String detail = fContent.getFieldValue(String.class, IJpfTraceConstants.THREAD_RELATED_METHOD);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("JpfTraceField::getInstructionSpecAndDetail: Warning, the insn is a LOCK/UNLOCK but has no detail");
+            }
+            isSpec = true;
+        }
+
+        Boolean isFieldAccess = fContent.getFieldValue(Boolean.class, IJpfTraceConstants.IS_FIELD_ACCESS);
+        if (isFieldAccess != null) {
+            if (isSpec) {
+                specBuilder.append(" | ");
+                detailBuilder.append(" | ");
+            }
+
+            specBuilder.append("FieldAccess");
+            String detail = fContent.getFieldValue(String.class, IJpfTraceConstants.ACCESSED_FIELD);
+            if (detail != null) {
+                detailBuilder.append(detail);
+            } else {
+                System.out.println("JpfTraceField::handleEvent: Warning, the insn is a FIELD ACCESS but has no detail");
+            }
+            isSpec = true;
+        }
+
+        return new String[] {specBuilder.toString(), detailBuilder.toString()};
     }
 }
